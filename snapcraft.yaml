@@ -1,16 +1,13 @@
-name: maas
-title: Minecraft As A Service
-base: core20
+name: minecraft-as-a-service
 version: 0.0.0
 summary: Minecraft server run as a service
 description: Runs, configures, and helps manage a minecraft server. Designed with ubuntu core in mind
 type: app
 grade: devel
 confinement: strict
-license: unlicense
 architectures:
-  - build on: [amd64, arm64]
-    run on: all
+  - build-on: [amd64, arm64]
+    run-on: all
 apps:
   mc-run-gui:
     command: bash $SNAP/bin/start.sh
@@ -18,18 +15,18 @@ apps:
       - network
       - network-bind
   mc-run-no-gui:
-    deamon: simple
+    daemon: simple
     command: bash $SNAP/bin/start.sh
-    stop-command: $SNAP/bin/stop.sh
+    stop-command: bash $SNAP/bin/stop.sh
     plugs:
       - network
       - network-bind
   mc-configure:
-    command: command: bash $SNAP/bin/configure.sh
+    command: bash $SNAP/bin/configure.sh
   mc-enable:
-    command: command: bash $SNAP/bin/enable.sh
+    command: bash $SNAP/bin/enable.sh
   mc-enable:
-    command: command: bash $SNAP/bin/disable.sh
+    command: bash $SNAP/bin/disable.sh
 
 parts:
   mc-server:
@@ -43,6 +40,6 @@ parts:
       - nano
     plugin: dump
     organize:
-        '*.json':$SNAP/config/
-        '*.sh':$SNAP/bin/
+        '*.json': config/
+        '*.sh': bin/
  
