@@ -1,0 +1,24 @@
+{
+"launcher":
+{
+        "server_path":"./",
+        "jarfile":"server.jar",
+        "memory":
+        {
+            "max":"2G",
+            "min":"1G"
+        },
+        "ramdisk":
+        {
+            "enabled":"false",
+            "size":"2G",
+            "file":"world_ramdisk",
+            "backup":
+            {
+                "file":"world",
+                "interval":"0",
+                "on_exit":"true"
+            }
+        }
+}
+}
