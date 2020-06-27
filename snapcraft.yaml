@@ -33,7 +33,7 @@ apps:
 
 parts:
   mc-server:
-    source: https://github.com/matthew-salerno/mc-server-installer
+    source: https://github.com/matthew-salerno/mc-as-a-service.git
     source-type: git
     plugin: nil
 
