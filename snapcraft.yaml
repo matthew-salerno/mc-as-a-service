@@ -32,29 +32,17 @@ apps:
     command: command: bash $SNAP/bin/disable.sh
 
 parts:
-  mc-server-installer:
+  mc-server:
     source: https://github.com/matthew-salerno/mc-server-installer
     source-type: git
     plugin: nil
-    
-    build-packages:
-      - openjdk-8-jre-headless
-      - curl
-      - sed
-      - jq
-      - nano
 
-      
     stage-packages:
       - openjdk-8-jre-headless
-      - curl
-      - sed
       - jq
       - nano
-
-
-  publish:
-    source: https://github.com/matthew-salerno/mc-server-installer
-    source-type: git
     plugin: dump
+    organize:
+        '*.json':$SNAP/config/
+        '*.sh':$SNAP/bin/
  
