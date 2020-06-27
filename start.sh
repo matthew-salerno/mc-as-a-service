@@ -1,6 +1,6 @@
 #!bin/bash
 
-config_path="$SNAP""/etc/mc-as-a-sevice.json"
+config_path="$SNAP""/etc/mc-as-a-service.json"
 server_path=`cat "$config_path" | jq '.launcher.server_path'` 
 #load the configuration
 mem_min=`cat "$config_path" | jq '.launcher.memory.min'` 
