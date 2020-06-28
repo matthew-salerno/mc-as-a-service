@@ -1,6 +1,6 @@
 name: mc-as-a-service
 version: 0.0.0
-base: core
+base: core20
 summary: Minecraft server run as a service
 description: Runs, configures, and helps manage a minecraft server. Designed with ubuntu core in mind
 type: app
@@ -34,10 +34,9 @@ apps:
     command: bash $SNAP/bin/install.sh
 
 parts:
-  mc-server:
-    source: https://github.com/matthew-salerno/mc-as-a-service.git
-    source-type: git
-    stage-snaps:
+  dependencies:
+    plugin: nil
+    build-snaps:
       - links
     stage-packages:
       - openjdk-8-jre-headless
@@ -46,6 +45,9 @@ parts:
       - sed
       - whiptail
       - curl
+  mc-server:
+    source: https://github.com/matthew-salerno/mc-as-a-service.git
+    source-type: git
     plugin: dump
     organize:
         '*.json': etc/
