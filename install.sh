@@ -2,11 +2,11 @@
 manifest_url="https://launchermeta.mojang.com/mc/game/version_manifest.json"
 config_path="$SNAP""/etc/mc-as-a-service.json"
 server_path="`cat "$config_path" | jq '.launcher.server_path'`"
-eula_path="$server_path""/eula.txt"
-server_jar_path="$server_path""/server.jar"
+eula_path=$server_path"/eula.txt"
+server_jar_path=$server_path"/server.jar"
 
-if [ ! -d $server_path]; then
-    mkdir "$server_path"
+if [ ! -d $server_pathv ]; then
+    mkdir $server_path
 fi
 
 ##ignore eula if it is already filled out
@@ -85,7 +85,7 @@ echo "Download complete"
 #check sha1
 sha1=`curl -fsL "$version_package_url" | jq -r '.downloads.server.sha1 | @sh' | sed "s/^'//" | sed "s/'$//"`
 echo "SHA1 in version package: "$sha1""
-sha1_server=`sha1sum "$server_jar_path" | sed 's/ .*//'`
+sha1_server=`sha1sum $server_jar_path | sed 's/ .*//'`
 echo "SHA1SUM for "$server_jar_path":  "$sha1_server""
 if [ ! "$sha1" = "$sha1_server" ]; then
     echo "SHA1 checks do not match, aborting"
