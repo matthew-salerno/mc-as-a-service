@@ -38,6 +38,10 @@ parts:
       - openjdk-8-jre-headless
       - jq
       - nano
+      - sed
+      - lynx
+      - whiptail
+      - curl
     plugin: dump
     organize:
         '*.json': etc/
