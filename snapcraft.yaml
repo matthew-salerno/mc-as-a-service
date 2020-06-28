@@ -29,6 +29,8 @@ apps:
     command: bash $SNAP/bin/enable.sh
   mc-disable:
     command: bash $SNAP/bin/disable.sh
+  mc-install:
+    command: bash $SNAP/bin/install.sh
 
 parts:
   mc-server:
