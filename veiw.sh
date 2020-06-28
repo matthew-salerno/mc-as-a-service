@@ -1,6 +1,6 @@
 #!/bin/bash
 config_path="$SNAP""/etc/mc-as-a-service.json"
-server_path=`cat "$config_path" | jq '.launcher.server_path'` 
+server_path="`cat "$config_path" | jq -r '.launcher.server_path | @sh'`"
 cat $server_path"/logs/latest.txt"
 cat $server_path"/outpipe" | sed '/.*/d'
 while true; do

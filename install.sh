@@ -1,11 +1,11 @@
 #!/bin/bash
 manifest_url="https://launchermeta.mojang.com/mc/game/version_manifest.json"
 config_path="$SNAP""/etc/mc-as-a-service.json"
-server_path="`cat "$config_path" | jq '.launcher.server_path'`"
+server_path="`cat "$config_path" | jq -r '.launcher.server_path | @sh'`"
 eula_path=$server_path"/eula.txt"
 server_jar_path=$server_path"/server.jar"
 
-if [ ! -d $server_pathv ]; then
+if [ ! -d $server_path ]; then
     mkdir $server_path
 fi
 
