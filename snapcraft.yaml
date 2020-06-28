@@ -1,4 +1,4 @@
-name: maas
+name: mc-as-a-service
 version: 0.0.0
 summary: Minecraft server run as a service
 description: Runs, configures, and helps manage a minecraft server. Designed with ubuntu core in mind
@@ -44,7 +44,6 @@ parts:
       - lynx
       - whiptail
       - curl
-      - sha1sum
     plugin: dump
     organize:
         '*.json': etc/
