@@ -37,13 +37,15 @@ parts:
     source: https://github.com/matthew-salerno/mc-as-a-service.git
     source-type: git
     plugin: nil
-
+    
+    stage-snaps:
+      - links
+    
     stage-packages:
       - openjdk-8-jre-headless
       - jq
       - nano
       - sed
-      - lynx
       - whiptail
       - curl
     plugin: dump
