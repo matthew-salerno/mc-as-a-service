@@ -5,6 +5,10 @@ server_path="`cat "$config_path" | jq '.launcher.server_path'`"
 eula_path=""$server_path"/eula.txt"
 server_jar_path=""$server_path"/server.jar"
 
+if [ ! -d $server_path]; then
+    mkdir "$server_path"
+fi
+
 ##ignore eula if it is already filled out
 #eula starts out as false
 eula="0"
