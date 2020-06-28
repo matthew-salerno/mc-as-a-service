@@ -19,7 +19,7 @@ if [ -f "$eula_path" ]; then
 fi
 
 if [ $eula = "0" ]; then
-    if [[ `bash "$eula_path"` =~ .*false ]]; then
+    if [[ `bash "$SNAP""/bin/eula.sh"` =~ .*false ]]; then
         exit 0
     fi
 fi
