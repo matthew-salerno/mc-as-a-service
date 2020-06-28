@@ -1,7 +1,7 @@
 #!bin/bash
 
 config_path="$SNAP""/etc/mc-as-a-service.json"
-server_path="`cat "$config_path" | jq -r '.launcher.server_path | @sh'`"
+server_path="`cat "$config_path" | jq -r '.launcher.server_path | @sh' | sed "s/^'//" | sed "s/'$//"`"
 #load the configuration
 mem_min=`cat "$config_path" | jq '.launcher.memory.min'` 
 mem_max=`cat "$config_path" | jq '.launcher.memory.max'` 
