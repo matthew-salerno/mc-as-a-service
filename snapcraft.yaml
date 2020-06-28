@@ -11,27 +11,27 @@ architectures:
     run-on: all
 apps:
   mc-run:
-    command: $SNAP/bin/start.sh
+    command: bin/start.sh
     plugs:
       - network
       - network-bind
   mc-run-service:
     daemon: simple
-    command: $SNAP/bin/start.sh
-    stop-command: $SNAP/bin/stop.sh
+    command: bin/start.sh
+    stop-command: bin/stop.sh
     plugs:
       - network
       - network-bind
   mc-view:
-    command: $SNAP/bin/view.sh
+    command: bin/view.sh
   mc-configure:
-    command: $SNAP/bin/configure.sh
+    command: bin/configure.sh
   mc-enable:
-    command: $SNAP/bin/enable.sh
+    command: bin/enable.sh
   mc-disable:
-    command: $SNAP/bin/disable.sh
+    command: bin/disable.sh
   mc-install:
-    command: $SNAP/bin/install.sh
+    command: bin/install.sh
 
 parts:
   dependencies:
