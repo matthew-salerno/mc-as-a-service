@@ -22,6 +22,7 @@ apps:
     plugs:
       - network
       - network-bind
+      - home
   mc-view:
     command: bin/view.sh
   mc-configure:
@@ -49,6 +50,6 @@ parts:
     source-type: git
     plugin: dump
     organize:
-        '*.json': etc/
+        '*.json': $SNAP_USER_DATA/config/
         '*.sh': bin/
  

@@ -1,7 +1,7 @@
 #!/bin/bash
 manifest_url="https://launchermeta.mojang.com/mc/game/version_manifest.json"
-config_path="$SNAP""/etc/mc-as-a-service.json"
-server_path="$SNAP""`cat "$config_path" | jq -r '.launcher.server_path | @sh' | sed "s/^'//" | sed "s/'$//"`"
+config_path="$SNAP_USER_DATA""/config/mc-as-a-service.json"
+server_path="$SNAP_USER_DATA""`cat "$config_path" | jq -r '.launcher.server_path | @sh' | sed "s/^'//" | sed "s/'$//"`"
 eula_path=$server_path"/eula.txt"
 server_jar_path=$server_path"/server.jar"
 
