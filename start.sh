@@ -22,6 +22,7 @@ fi
 cat "$in_pipe" | sed '/.*/d'
 
 #start the server
+echo "" > "$in_pipe"
 while true; do
     temp=`cat "$in_pipe"`
     echo $temp

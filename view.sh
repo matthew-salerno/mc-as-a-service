@@ -1,3 +1,4 @@
 #!/bin/bash
 source "$SNAP"/bin/header.sh
-tail -F "$out_log"
+tail -f "$out_log" &
+cat 0 >> "$in_pipe"
