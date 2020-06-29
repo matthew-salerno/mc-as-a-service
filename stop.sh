@@ -1,3 +1,3 @@
 #!bin/bash
-/bin/header.sh
+"$SNAP"/bin/header.sh
 echo "stop" > "$in_pipe"
