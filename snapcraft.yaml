@@ -33,6 +33,8 @@ apps:
     command: bin/disable.sh
   mc-install:
     command: bin/install.sh
+    plugs:
+      - network
 
 parts:
   dependencies:
@@ -50,6 +52,6 @@ parts:
     source-type: git
     plugin: dump
     organize:
-        '*.json': $SNAP_USER_DATA/config/
+        '*.json': etc/
         '*.sh': bin/
  

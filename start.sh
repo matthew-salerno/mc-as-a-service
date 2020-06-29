@@ -1,17 +1,15 @@
 #!/bin/bash
-
-config_path="$SNAP_USER_DATA""/config/mc-as-a-service.json"
-server_path="$SNAP_USER_DATA""`cat "$config_path" | jq -r '.launcher.server_path | @sh' | sed "s/^'//" | sed "s/'$//"`"
+bash "$SNAP""/bin/header.sh"
 #load the configuration
 mem_min=`cat "$config_path" | jq '.launcher.memory.min'` 
 mem_max=`cat "$config_path" | jq '.launcher.memory.max'` 
 
 #create pipes if none exists
 if [ ! -f "inpipe" ]
-    then mkfifo "$server_path""/inpipe"
+    then mkfifo "$in_pipe"
 fi
 if [ ! -f "outpipe" ]
-    then mkfifo "$server_path""/outpipe"
+    then mkfifo "$out_pipe"
 fi
 
 #deletes everything without using /dev/null
@@ -19,9 +17,9 @@ cat pipe | sed '/.*/d'
 
 #start the server
 while true; do
-    temp=`cat "$server_path""/inpipe"`
+    temp=`cat "$in_pipe"`
     echo $temp
     if [ "$temp" = "stop" ]
         then break
     fi
-done | java -Xmx"$mem_max" -Xms"$mem_min" -jar server.jar nogui >> "$server_path""/outpipe"
+done | java -Xmx"$mem_max" -Xms"$mem_min" -jar server.jar nogui >> "$out_pipe"

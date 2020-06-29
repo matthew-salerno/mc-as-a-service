@@ -1,8 +1,5 @@
 #!/bin/bash
-manifest_url="https://launchermeta.mojang.com/mc/game/version_manifest.json"
-config_path="$SNAP_USER_DATA""/config/mc-as-a-service.json"
-server_path="$SNAP_USER_DATA""`cat "$config_path" | jq -r '.launcher.server_path | @sh' | sed "s/^'//" | sed "s/'$//"`"
-eula_path=$server_path"/eula.txt"
+bash "$SNAP""/bin/header.sh"
 ##EULA
 echo "#By changing the setting below to TRUE you are indicating your agreement to our EULA (https://account.mojang.com/documents/minecraft_eula)." > $eula_path
 echo "#""`date`" >> $eula_path
