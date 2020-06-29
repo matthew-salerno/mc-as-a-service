@@ -7,10 +7,10 @@ export JAVA_HOME="$SNAP""/usr/lib/jvm/java-1.8.0-openjdk-$SNAP_ARCH"
 export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 
 #create pipes if none exists
-if [ ! -f "inpipe" ]
+if [ ! -f "$in_pipe" ]
     then mkfifo "$in_pipe"
 fi
-if [ ! -f "outpipe" ]
+if [ ! -f "$out_pipe" ]
     then mkfifo "$out_pipe"
 fi
 
