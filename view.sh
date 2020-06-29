@@ -1,5 +1,5 @@
 #!/bin/bash
-"$SNAP"/bin/header.sh
+source "$SNAP"/bin/header.sh
 cat $server_path"/logs/latest.txt"
 cat $server_path"/outpipe" | sed '/.*/d'
 while true; do
