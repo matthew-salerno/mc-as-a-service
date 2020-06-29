@@ -15,7 +15,7 @@ if [ ! -p "$in_pipe" ]
 fi
 #create outfile if it doesn't exist
 if [ ! -f "$out.log" ]
-    then mkfifo "$out_log"
+    then echo "" > "$out_log"
 fi
 
 #deletes everything without using /dev/null
