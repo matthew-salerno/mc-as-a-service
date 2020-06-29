@@ -10,9 +10,13 @@ export jarfile_path="$SNAP_USER_DATA""$server_path""`cat "$config_path" | jq -r 
 export $in_pipe="$server_path""/inpipe"
 export $out_pipe="$server_path""/outpipe"
 
+#make sure config directory exists
+if [ ! -d "$SNAP_USER_DATA""/config" ]; then
+    mkdir "$SNAP_USER_DATA""/config"
+fi
 #make sure config exists
-if [ ! -d $config_path ]; then
-    mkdir $config_path
+if [ ! -f $config_path ]; then
+    cp "$SNAP""/etc/default_config.json" "$config_path"
 fi
 #make sure server folder exists
 if [ ! -d $server_path ]; then
