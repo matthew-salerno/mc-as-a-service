@@ -40,7 +40,7 @@ echo "" > "$in_pipe"
 
 #start the server
 echo "Starting server"
-wakeup&
+wakeup &
 while true; do
     temp=`cat "$in_pipe"`
     echo $temp
@@ -52,3 +52,4 @@ done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_lo
 
 #cleanup
 trap cleanup EXIT
+trap cleanup KILL
