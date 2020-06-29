@@ -22,11 +22,19 @@ fi
 cat "$in_pipe" | sed '/.*/d'
 
 #start the server
-echo "" > "$in_pipe"
+init="first"
 while true; do
     temp=`cat "$in_pipe"`
     echo $temp
+    #this mess gets the in_pipe going... somehow
+    if ["$init" = "first"]; then
+        init="second"
+    elif ["$init" = "second"]; then
+        init="done"
+        echo "" > "$in_pipe"
+    fi
+    #this part stops the loop when the server gets the stop command
     if [ "$temp" = "stop" ]
         then break
     fi
-done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" && cat "" > "$out_log" &
+done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" && cat "" > "$out_log"
