@@ -25,14 +25,14 @@ if [ ! -f "$out.log" ]
     then echo "" > "$out_log"
 fi
 
-#deletes everything without using /dev/null
-cat "$in_pipe" | sed '/.*/d'
+#clear the pipe
+echo "" > "$in_pipe"
 
 #setup ramdisk
 
 #start the server
 echo "Starting server"
-wakeup&
+#wakeup&
 while true; do
     temp=`cat "$in_pipe"`
     echo $temp
