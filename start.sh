@@ -6,6 +6,9 @@ mem_max=$(cat "$config_path" | jq -r '.launcher.memory.max | @sh' | sed "s/^'//"
 export JAVA_HOME="$SNAP""/usr/lib/jvm/java-1.8.0-openjdk-$SNAP_ARCH"
 export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 
+#cd into proper directory
+cd "$server_path"
+
 #create pipes if none exists
 if [ ! -f "$in_pipe" ]
     then mkfifo "$in_pipe"
