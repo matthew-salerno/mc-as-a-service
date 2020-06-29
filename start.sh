@@ -13,7 +13,7 @@ if [ ! -f "outpipe" ]
 fi
 
 #deletes everything without using /dev/null
-cat pipe | sed '/.*/d'
+cat "$in_pipe" | sed '/.*/d'
 
 #start the server
 while true; do
