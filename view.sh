@@ -2,11 +2,10 @@
 source "$SNAP"/bin/header.sh
 
 function cleanup () {
-    kill "$process"
+    kill -KILL "$process"
 }
 
-tail -f "$out_log" &
-process=&!
+tail -f "$out_log" &; process=&!
 read
 while [ ! "$REPLY"="exit" ]; do
     echo "$REPLY" > "$in_pipe"

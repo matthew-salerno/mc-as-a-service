@@ -3,6 +3,17 @@
 
 config_path="$SNAP_USER_DATA""/config/mc-as-a-service.json"
 
+function spinny () {
+    #weird formatting is because some stuff didn't show in my terminal
+    local chars=("/" "--\b" "\\" "|") 
+    while true; do
+        for (( i=1; i<=${#chars}; i++ )); do
+            sleep 0.5
+            echo -ne "${chars[$i]}" "\r";
+        done
+    done
+}
+
 #make sure config directory exists
 if [ ! -d "$SNAP_USER_DATA""/config" ]; then
     mkdir "$SNAP_USER_DATA""/config"

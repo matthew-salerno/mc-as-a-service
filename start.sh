@@ -8,21 +8,36 @@ mem_max=$(cat "$config_path" | jq -r '.launcher.memory.max | @sh' | sed "s/^'//"
 export JAVA_HOME="$SNAP""/usr/lib/jvm/java-1.8.0-openjdk-$SNAP_ARCH"
 export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 
-#server won't start until input has been opened, this function is meant to be forked
-function wakeup () {
-    sleep 1
-    echo "Opening server input"
-    echo "" > "$in_pipe"
-}
-
-function cleanup () {
-    echo "stop" > "$in_pipe"
-    cat "" > "$out_log"
-    echo "server stopped"
-}
-
 #cd into proper directory
 cd "$server_path"
+
+function shutdown () {
+    if [ -n `jobs -p | grep $server_pid` ]; then
+        echo "waiting for server to shut down"
+        spinny &; spin_pid=$!
+        while [ -n `jobs -p | grep $server_pid` ]; do
+            sleep 0.5
+        done
+        kill -KILL $spin_pid
+        echo "server shut down"
+    else
+        echo "server is not running"
+    fi
+    cleanup
+    }
+
+function cleanup () {
+    echo "cleaning up"
+    cat "" > "$out_log"
+    echo "cleaned up"
+}
+
+function interrupted () {
+    echo "Server interupted, shutting down"
+    shutdown
+}
+
+
 
 #create in pipe if none exists
 if [ ! -p "$in_pipe" ]
@@ -33,12 +48,8 @@ if [ ! -f "$out.log" ]
     then echo "" > "$out_log"
 fi
 #setup ramdisk
-echo "line 40"
 #start the server
 echo -e "Starting server at ""$jarfile_path""\nwith initial memory of ""$mem_min"" and a max memory of ""$mem_max"
-echo "line 43"
-#wakeup &
-echo "line 45"
 while true; do
     temp=`cat "$in_pipe"`
     echo $temp
@@ -46,7 +57,9 @@ while true; do
     if [ "$temp" = "stop" ]
         then break
     fi
-done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log"
-
+done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" &
+server_pid=&1
+echo "Server is running "
+spinny
 #cleanup
-trap cleanup EXIT SIGINT
+trap shutdown EXIT SIGINT
