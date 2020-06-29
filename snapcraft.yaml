@@ -43,6 +43,7 @@ apps:
       - network
       - network-bind
       - home
+      - browser-support
 
 parts:
   dependencies:
