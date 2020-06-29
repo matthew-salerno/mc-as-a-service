@@ -32,10 +32,6 @@ fi
 if [ ! -f "$out.log" ]
     then echo "" > "$out_log"
 fi
-
-#clear the pipe
-echo "" > "$in_pipe"
-
 #setup ramdisk
 echo "line 40"
 #start the server
