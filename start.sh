@@ -23,7 +23,7 @@ cat "$in_pipe" | sed '/.*/d'
 
 #start the server
 #this bit stops the server from waiting on cat
-(sleep 2; echo "" > "$in_pipe")&
+(nohup sleep 5; echo "" > "$in_pipe"; echo "Starting server")&
 while true; do
     temp=`cat "$in_pipe"`
     echo $temp
@@ -31,4 +31,6 @@ while true; do
     if [ "$temp" = "stop" ]
         then break
     fi
-done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" && cat "" > "$out_log"
+done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log"
+cat "" > "$out_log"
+echo "server stopped"
