@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "preparing to launch server"
 source "$SNAP"/bin/header.sh
 #load the configuration
 mem_min=$(cat "$config_path" | jq -r '.launcher.memory.min | @sh' | sed "s/^'//" | sed "s/'$//")

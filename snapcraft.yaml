@@ -16,7 +16,7 @@ apps:
       - network
       - network-bind
       - home
-  mc-run-service:
+  mc-service:
     daemon: simple
     command: bin/start.sh
     stop-command: bin/stop.sh

@@ -1,9 +1,15 @@
 #!/bin/bash
 source "$SNAP"/bin/header.sh
 
-command=`read`
-tail -fs 1 "$out_log"
-while [ ! "$command" = "exit" ]; do
-    echo "$command" > $in_pipe
-    command=`read`
+function cleanup () {
+    kill "$process"
+}
+
+tail -f "$out_log" &
+$process=&!
+read
+while [ ! "$REPLY" = "exit" ]; do
+    echo "$REPLY" > "$in_pipe"
+    read
 done
+trap cleanup EXIT
