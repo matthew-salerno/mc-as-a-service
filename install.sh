@@ -1,5 +1,5 @@
 #!/bin/bash
-bash "$SNAP""/bin/header.sh"
+/bin/header.sh
 
 #EULA FUNCTION
 ##EULA
