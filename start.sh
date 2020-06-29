@@ -27,4 +27,4 @@ while true; do
     if [ "$temp" = "stop" ]
         then break
     fi
-done | java -Xmx"$mem_max" -Xms"$mem_min" -jar server.jar nogui >> "$out_pipe"
+done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_pipe"
