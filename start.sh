@@ -6,6 +6,13 @@ mem_max=$(cat "$config_path" | jq -r '.launcher.memory.max | @sh' | sed "s/^'//"
 export JAVA_HOME="$SNAP""/usr/lib/jvm/java-1.8.0-openjdk-$SNAP_ARCH"
 export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 
+#server won't start until input has been opened, this function is ment to be forked
+function wakeup () {
+    sleep 1
+    echo "Opening server input"
+    echo "" > "$in_pipe"
+}
+
 #cd into proper directory
 cd "$server_path"
 
@@ -21,9 +28,11 @@ fi
 #deletes everything without using /dev/null
 cat "$in_pipe" | sed '/.*/d'
 
+#setup ramdisk
+
 #start the server
-#this bit stops the server from waiting on cat
-(nohup sleep 5; echo "" > "$in_pipe"; echo "Starting server")&
+echo "Starting server"
+wakeup&
 while true; do
     temp=`cat "$in_pipe"`
     echo $temp
@@ -34,3 +43,5 @@ while true; do
 done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log"
 cat "" > "$out_log"
 echo "server stopped"
+
+#cleanup
