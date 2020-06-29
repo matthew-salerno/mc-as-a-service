@@ -9,12 +9,13 @@ export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 #cd into proper directory
 cd "$server_path"
 
-#create pipes if none exists
-if [ ! -f "$in_pipe" ]
+#create in pipe if none exists
+if [ ! -p "$in_pipe" ]
     then mkfifo "$in_pipe"
 fi
-if [ ! -f "$out_pipe" ]
-    then mkfifo "$out_pipe"
+#create outfile if it doesn't exist
+if [ ! -f "$out.log" ]
+    then mkfifo "$out_log"
 fi
 
 #deletes everything without using /dev/null
@@ -27,4 +28,4 @@ while true; do
     if [ "$temp" = "stop" ]
         then break
     fi
-done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_pipe"
+done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" && cat "" > "$out_log" &

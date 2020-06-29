@@ -19,7 +19,7 @@ function eula () {
 ##ignore eula if it is already filled out
 #eula starts out as false
 eula="0"
-if [ -f "$eula_path" ]; then
+if [ -e "$eula_path" ]; then
     if [[ `cat "$eula_path" | grep "eula="` =~ .*true ]]; then
         eula="1"
     fi
