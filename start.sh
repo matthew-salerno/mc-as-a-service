@@ -37,10 +37,12 @@ fi
 echo "" > "$in_pipe"
 
 #setup ramdisk
-
+echo "line 40"
 #start the server
 echo -e "Starting server at ""$jarfile_path""\nwith initial memory of ""$mem_min"" and a max memory of ""$mem_max"
+echo "line 43"
 wakeup &
+echo "line 45"
 while true; do
     temp=`cat "$in_pipe"`
     echo $temp
