@@ -11,7 +11,7 @@ export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 #server won't start until input has been opened, this function is meant to be forked
 function wakeup () {
     sleep 1
-    echo "Opening server input" >&1
+    echo "Opening server input"
     echo "" > "$in_pipe"
 }
 
@@ -39,7 +39,7 @@ echo "" > "$in_pipe"
 #setup ramdisk
 
 #start the server
-echo "Starting server"
+echo -e "Starting server at ""$jarfile_path""\nwith initial memory of ""$mem_min"" and a max memory of ""$mem_max"
 wakeup &
 while true; do
     temp=`cat "$in_pipe"`
@@ -51,5 +51,4 @@ while true; do
 done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log"
 
 #cleanup
-trap cleanup EXIT
-trap cleanup KILL
+trap cleanup EXIT SIGINT
