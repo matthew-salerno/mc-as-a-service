@@ -83,7 +83,7 @@ else
 fi
 
 #get the url for the package json
-echo "Seected version: "$selected_version""
+echo "Selected version: "$selected_version""
 version_package_url=$(curl -fsL "$manifest_url" | jq -r '.versions | map(select(.id == "'$selected_version'")) | map(.url) | @sh' | sed "s/^'//" | sed "s/'$//")
 echo "Found version package at "$version_package_url""
 #get download location from package json

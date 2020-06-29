@@ -1,8 +1,8 @@
 #!/bin/bash
 source "$SNAP"/bin/header.sh
 #load the configuration
-mem_min=`cat "$config_path" | jq -r '.launcher.memory.min | @sh' | sed "s/^'//" | sed "s/'$//"`" ` 
-mem_max=`cat "$config_path" | jq -r '.launcher.memory.max | @sh' | sed "s/^'//" | sed "s/'$//"`" ` 
+mem_min=$(cat "$config_path" | jq -r '.launcher.memory.min | @sh' | sed "s/^'//" | sed "s/'$//")
+mem_max=$(cat "$config_path" | jq -r '.launcher.memory.max | @sh' | sed "s/^'//" | sed "s/'$//")
 
 #create pipes if none exists
 if [ ! -f "inpipe" ]
