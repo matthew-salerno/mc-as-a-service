@@ -1,7 +1,7 @@
 #!/bin/bash
 bash "$SNAP""/bin/header.sh"
 ##EULA
-echo >> "$eula_path"
+echo "$eula_path"
 echo "#By changing the setting below to TRUE you are indicating your agreement to our EULA (https://account.mojang.com/documents/minecraft_eula)." > "$eula_path"
 echo "#""`date`" >> "$eula_path"
 echo $(lynx --cfg "$SNAP""/etc/lynx/lynx.cfg" --dump --anonymous "https://account.mojang.com/documents/minecraft_eula" | sed '/^ *\*\|^ *+/d' | sed '1,+4d')
