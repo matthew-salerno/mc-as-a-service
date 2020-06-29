@@ -15,6 +15,7 @@ apps:
     plugs:
       - network
       - network-bind
+      - home
   mc-run-service:
     daemon: simple
     command: bin/start.sh
@@ -25,16 +26,23 @@ apps:
       - home
   mc-view:
     command: bin/view.sh
+    plugs:
+      - home
   mc-configure:
     command: bin/configure.sh
+    plugs:
+      - home
   mc-enable:
     command: bin/enable.sh
+
   mc-disable:
     command: bin/disable.sh
   mc-install:
     command: bin/install.sh
     plugs:
       - network
+      - network-bind
+      - home
 
 parts:
   dependencies:
