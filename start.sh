@@ -29,6 +29,7 @@ while true; do
     #this mess gets the in_pipe going... somehow
     if ["$init" = "first"]; then
         init="second"
+        sleep 1
     elif ["$init" = "second"]; then
         init="done"
         echo "" > "$in_pipe"
