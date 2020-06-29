@@ -40,10 +40,7 @@ apps:
   mc-install:
     command: bin/install.sh
     plugs:
-      - network
-      - network-bind
       - home
-      - browser-support
 
 parts:
   dependencies:
