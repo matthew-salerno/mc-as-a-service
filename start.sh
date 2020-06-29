@@ -1,5 +1,6 @@
 #!/bin/bash
 echo "preparing to launch server"
+sleep 1
 source "$SNAP"/bin/header.sh
 #load the configuration
 mem_min=$(cat "$config_path" | jq -r '.launcher.memory.min | @sh' | sed "s/^'//" | sed "s/'$//")
@@ -7,11 +8,17 @@ mem_max=$(cat "$config_path" | jq -r '.launcher.memory.max | @sh' | sed "s/^'//"
 export JAVA_HOME="$SNAP""/usr/lib/jvm/java-1.8.0-openjdk-$SNAP_ARCH"
 export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 
-#server won't start until input has been opened, this function is ment to be forked
+#server won't start until input has been opened, this function is meant to be forked
 function wakeup () {
     sleep 1
-    echo "Opening server input"
+    echo "Opening server input" >&1
     echo "" > "$in_pipe"
+}
+
+function cleanup () {
+    echo "stop" > "$in_pipe"
+    cat "" > "$out_log"
+    echo "server stopped"
 }
 
 #cd into proper directory
@@ -33,7 +40,7 @@ echo "" > "$in_pipe"
 
 #start the server
 echo "Starting server"
-#wakeup&
+wakeup&
 while true; do
     temp=`cat "$in_pipe"`
     echo $temp
@@ -42,7 +49,6 @@ while true; do
         then break
     fi
 done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log"
-cat "" > "$out_log"
-echo "server stopped"
 
 #cleanup
+trap cleanup EXIT
