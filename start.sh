@@ -22,18 +22,11 @@ fi
 cat "$in_pipe" | sed '/.*/d'
 
 #start the server
-init="first"
+#this bit stops the server from waiting on cat
+(sleep 2; echo "" > "$in_pipe")&
 while true; do
     temp=`cat "$in_pipe"`
     echo $temp
-    #this mess gets the in_pipe going... somehow
-    if ["$init" = "first"]; then
-        init="second"
-        sleep 1
-    elif ["$init" = "second"]; then
-        init="done"
-        echo "" > "$in_pipe"
-    fi
     #this part stops the loop when the server gets the stop command
     if [ "$temp" = "stop" ]
         then break
