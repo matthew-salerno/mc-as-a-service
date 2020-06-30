@@ -32,6 +32,7 @@ cleanup () {
     echo "cleaning up"
     echo "" > "$out_log"
     echo "cleaned up"
+    exit 0
 }
 
 interrupted () {
@@ -68,4 +69,3 @@ done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_lo
 server_pid=$!
 echo "Server is running with PID of ""$server_pid"
 spinny
-#cleanup
