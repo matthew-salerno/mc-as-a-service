@@ -8,8 +8,6 @@ mem_max=$(cat "$config_path" | jq -r '.launcher.memory.max | @sh' | sed "s/^'//"
 export JAVA_HOME="$SNAP""/usr/lib/jvm/java-1.8.0-openjdk-$SNAP_ARCH"
 export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 
-#cd into proper directory
-cd "$server_path"
 
 shutdown () {
     if [ -n `jobs -p | grep $server_pid` ]; then
@@ -39,6 +37,11 @@ interrupted () {
     shutdown
 }
 
+trap shutdown EXIT
+trap shutdown SIGINT
+
+#cd into proper directory
+cd "$server_path"
 
 
 #create in pipe if none exists
@@ -64,5 +67,3 @@ server_pid=$!
 echo "Server is running with PID of ""$server_pid"
 spinny
 #cleanup
-trap shutdown EXIT
-trap shutdown SIGINT
