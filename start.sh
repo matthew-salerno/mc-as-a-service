@@ -30,7 +30,6 @@ cleanup () {
     echo "cleaning up"
     cat "" > "$out_log"
     echo "cleaned up"
-    exit 0
 }
 
 interrupted () {
@@ -60,7 +59,7 @@ while true; do
     temp=`cat "$in_pipe"`
     echo $temp
     #this part stops the loop when the server gets the stop command
-    if [ "$temp" = "stop" ]
+    if [ "$temp" == "stop" ]
         then break
     fi
 done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" &

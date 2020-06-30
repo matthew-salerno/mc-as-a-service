@@ -95,7 +95,7 @@ sha1=`curl -fsL "$version_package_url" | jq -r '.downloads.server.sha1 | @sh' | 
 echo "SHA1 in version package: "$sha1""
 sha1_server=`sha1sum $server_jar_path | sed 's/ .*//'`
 echo "SHA1SUM for "$server_jar_path":  "$sha1_server""
-if [ ! "$sha1" = "$sha1_server" ]; then
+if [ ! "$sha1" == "$sha1_server" ]; then
     echo "SHA1 checks do not match, aborting"
     rm -f "$server_jar_path"
     exit 1
