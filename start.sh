@@ -10,6 +10,7 @@ export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 
 
 shutdown () {
+    echo "stop" > "$in_pipe"
     if [ -n `jobs -p | grep $server_pid` ]; then
         echo "waiting for server to shut down"
         spinny &
@@ -55,14 +56,7 @@ fi
 #setup ramdisk
 #start the server
 echo -e "Starting server at ""$jarfile_path""\nwith initial memory of ""$mem_min"" and a max memory of ""$mem_max"
-while true; do
-    temp=`cat "$in_pipe"`
-    echo $temp
-    #this part stops the loop when the server gets the stop command
-    if [ "$temp" = "stop" ]
-        then break
-    fi
-done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" &
+java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" < "$in_pipe" &
 server_pid=$!
 echo "Server is running with PID of ""$server_pid"
 spinny
