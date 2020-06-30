@@ -16,7 +16,7 @@ shutdown () {
         spinny &
         spin_pid=$!
         while [ -n `jobs -p | grep $server_pid` ]; do
-            echo -ne "`jobs -p | grep $server_pid`""          \r"
+            echo -ne "Job running: ""`jobs -p | grep $server_pid`""          \r"
             sleep 0.5
         done
         kill -KILL $spin_pid
