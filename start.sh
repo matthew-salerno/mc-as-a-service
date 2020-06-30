@@ -11,7 +11,7 @@ export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 #cd into proper directory
 cd "$server_path"
 
-function shutdown () {
+shutdown () {
     if [ -n `jobs -p | grep $server_pid` ]; then
         echo "waiting for server to shut down"
         spinny &
@@ -27,14 +27,14 @@ function shutdown () {
     cleanup
     }
 
-function cleanup () {
+cleanup () {
     echo "cleaning up"
     cat "" > "$out_log"
     echo "cleaned up"
     exit 0
 }
 
-function interrupted () {
+interrupted () {
     echo "Server interupted, shutting down"
     shutdown
 }

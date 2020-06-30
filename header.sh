@@ -3,14 +3,14 @@
 
 config_path="$SNAP_USER_DATA""/config/mc-as-a-service.json"
 
-function spinny () {
-    #weird formatting is because some stuff didn't show in my terminal
-    chars=("/" "--\b" "\\" "|") 
-    while true; do
-        for (( i=0; i<${#chars}; i++ )); do
-            sleep 0.5
-            echo -ne "${chars[$i]}" "\r";
-        done
+
+spinny() {
+    local i sp n
+    sp='/-\|'
+    n=${#sp}
+    printf ' '
+    while sleep 0.1; do
+        printf "%s\b" "${sp:i++%n:1}"
     done
 }
 

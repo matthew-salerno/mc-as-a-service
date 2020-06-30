@@ -1,7 +1,7 @@
 #!/bin/bash
 source "$SNAP"/bin/header.sh
 
-function cleanup () {
+cleanup () {
     kill -KILL "$process"
 }
 
