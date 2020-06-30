@@ -5,7 +5,7 @@ config_path="$SNAP_USER_DATA""/config/mc-as-a-service.json"
 
 function spinny () {
     #weird formatting is because some stuff didn't show in my terminal
-    local chars=("/" "--\b" "\\" "|") 
+    chars=("/" "--\b" "\\" "|") 
     while true; do
         for (( i=1; i<=${#chars}; i++ )); do
             sleep 0.5

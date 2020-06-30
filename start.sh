@@ -31,6 +31,7 @@ function cleanup () {
     echo "cleaning up"
     cat "" > "$out_log"
     echo "cleaned up"
+    exit 0
 }
 
 function interrupted () {
