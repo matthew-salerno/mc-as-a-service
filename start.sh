@@ -11,9 +11,9 @@ export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 
 shutdown () {
     echo "stop" > "$in_pipe"
+    echo "`jobs -p`"
     if [ ! `jobs -p | grep "$server_pid"` == "" ]; then
         echo "waiting for server with PID ""$server_pid"" to shut down"
-        echo "`jobs -p`"
         spinny &
         spin_pid=$!
         while [ ! `jobs -p | grep "$server_pid"` == "" ]; do
