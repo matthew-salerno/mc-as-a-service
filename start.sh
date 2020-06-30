@@ -9,11 +9,11 @@ export JAVA_HOME="$SNAP""/usr/lib/jvm/java-1.8.0-openjdk-$SNAP_ARCH"
 export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 
 
-shutdown () {
+stop_server () {
     kill -KILL $spinny_pid
-    echo "stop" > "$in_pipe"
-    echo "`jobs -p $server_pid`"
+    
     if [ ! "`pgrep -a java | grep "$server_pid"`" == "" ]; then
+        echo "stop" > "$in_pipe"
         echo "waiting for server with PID ""$server_pid"" to shut down"
         spinny &
         spin_pid=$!
@@ -38,10 +38,10 @@ cleanup () {
 
 interrupted () {
     echo "Server interupted, shutting down"
-    shutdown
+    stop_server
 }
 
-trap shutdown SIGINT
+trap interrupted SIGINT
 
 #cd into proper directory
 cd "$server_path"
@@ -73,4 +73,4 @@ spinny_pid=$!
 while [ ! "`pgrep -a java | grep "$server_pid"`" == "" ]; do
             sleep 5
 done
-shutdown
+stop_server
