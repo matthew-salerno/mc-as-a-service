@@ -20,5 +20,8 @@ process=$!
 read
 while [ ! "$REPLY" == "exit" ]; do
     echo "$REPLY" > "$in_pipe"
+    if [ "$REPLY" == "stop" ]; then
+        break
+    fi
     read
 done
