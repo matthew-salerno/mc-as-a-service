@@ -10,6 +10,7 @@ export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 
 
 shutdown () {
+    kill -KILL $spinny_pid
     echo "stop" > "$in_pipe"
     echo "`jobs -p $server_pid`"
     if [ ! "`pgrep -a java | grep "$server_pid"`" == "" ]; then
@@ -17,10 +18,10 @@ shutdown () {
         spinny &
         spin_pid=$!
         while [ ! "`pgrep -a java | grep "$server_pid"`" == "" ]; do
-            echo -ne " Jobs running: ""`jobs -p`""          \r"
             sleep 1
         done
         kill -KILL $spin_pid
+        
         echo "server shut down"
     else
         echo "server is not running"
@@ -40,7 +41,6 @@ interrupted () {
     shutdown
 }
 
-trap shutdown EXIT
 trap shutdown SIGINT
 
 #cd into proper directory
@@ -68,4 +68,9 @@ while true; do
 done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" &
 server_pid=$!
 echo "Server is running with PID of ""$server_pid"
-spinny
+spinny &
+spinny_pid=$!
+while [ ! "`pgrep -a java | grep "$server_pid"`" == "" ]; do
+            sleep 5
+done
+shutdown
