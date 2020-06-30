@@ -2,12 +2,38 @@
 echo "preparing to launch server"
 sleep 1
 source "$SNAP"/bin/header.sh
-#load the configuration
-mem_min=$(cat "$config_path" | jq -r '.launcher.memory.min | @sh' | sed "s/^'//" | sed "s/'$//")
-mem_max=$(cat "$config_path" | jq -r '.launcher.memory.max | @sh' | sed "s/^'//" | sed "s/'$//")
-export JAVA_HOME="$SNAP""/usr/lib/jvm/java-1.8.0-openjdk-$SNAP_ARCH"
-export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 
+if [ -f "$server_path"/server.properties ]; then
+    world_path=""$server_path"/`cat "$server_path"/server.properties | sed -n 's/level-name=//p'`"
+else
+    world_path=$(cat "$server_path"/world)
+fi
+
+start_ramdisk () {
+    mkdir "$ramdisk_path"
+    if [ $ramdisk_ramfs == "false" ]; then
+        mount -t tmpfs -o "$ramdisk_size" mc-ramdisk "$ramdisk_path"
+    else
+        mount -t ramfs -o "$ramdisk_size" mc-ramdisk "$ramdisk_path"
+    fi
+}
+
+backup_ramdisk_cycle () {
+    while true; do
+        backup_ramdisk
+        sleep "$ramdisk_interval"
+    done
+}
+
+backup_ramdisk () {
+    echo "say Server is backing up ramdisk" > "$in_pipe"
+    rsync -ra "$ramdisk_path" "$world_path"
+    echo "say Server is done backing up ramdisk" > "$in_pipe"
+}
+
+stop_ramdisk () {
+    umount
+}
 
 stop_server () {
     kill -KILL $spinny_pid
@@ -48,12 +74,12 @@ cd "$server_path"
 
 
 #create in pipe if none exists
-if [ ! -p "$in_pipe" ]
-    then mkfifo "$in_pipe"
+if [ ! -p "$in_pipe" ]; then
+    mkfifo "$in_pipe"
 fi
 #create outfile if it doesn't exist
-if [ ! -f "$out.log" ]
-    then echo "" > "$out_log"
+if [ ! -f "$out.log" ]; then
+    echo "" > "$out_log"
 fi
 #setup ramdisk
 #start the server
@@ -62,8 +88,8 @@ while true; do
     temp=`cat "$in_pipe"`
     echo $temp
     #this part stops the loop when the server gets the stop command
-    if [ "$temp" == "stop" ]
-        then break
+    if [ "$temp" == "stop" ]; then
+        break
     fi
 done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" &
 server_pid=$!

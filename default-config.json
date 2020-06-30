@@ -12,13 +12,9 @@
         {
             "enabled":"false",
             "size":"2G",
+            "can_outgrow_size":"false",
             "file":"world_ramdisk",
-            "backup":
-            {
-                "file":"world",
-                "interval":"0",
-                "on_exit":"true"
-            }
+            "interval":"0"
         }
 }
 }
