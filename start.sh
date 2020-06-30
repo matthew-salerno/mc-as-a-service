@@ -11,16 +11,14 @@ export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 
 shutdown () {
     echo "stop" > "$in_pipe"
-    echo "`jobs -p`"
-    let "server_pid--"
-    #don't ask me why but jobs gives it a pid of 1 lower than it actually is
-    if [ ! `jobs -p | grep "$server_pid"` == "" ]; then
+    echo "`jobs -p $server_pid`"
+    if [ ! "`pgrep -a java | grep "$server_pid"`" == "" ]; then
         echo "waiting for server with PID ""$server_pid"" to shut down"
         spinny &
         spin_pid=$!
-        while [ ! `jobs -p | grep "$server_pid"` == "" ]; do
+        while [ ! "`pgrep -a java | grep "$server_pid"`" == "" ]; do
             echo -ne " Jobs running: ""`jobs -p`""          \r"
-            sleep 0.5
+            sleep 1
         done
         kill -KILL $spin_pid
         echo "server shut down"
