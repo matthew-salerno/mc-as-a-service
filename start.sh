@@ -14,7 +14,8 @@ cd "$server_path"
 function shutdown () {
     if [ -n `jobs -p | grep $server_pid` ]; then
         echo "waiting for server to shut down"
-        spinny &; spin_pid=$!
+        spinny &
+        spin_pid=$!
         while [ -n `jobs -p | grep $server_pid` ]; do
             sleep 0.5
         done
