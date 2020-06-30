@@ -61,7 +61,8 @@ while true; do
     fi
 done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" &
 server_pid=&!
-echo "Server is running "
+echo "Server is running with PID of ""$server_pid"
 spinny
 #cleanup
-trap shutdown EXIT SIGINT
+trap shutdown EXIT
+trap shutdown SIGINT

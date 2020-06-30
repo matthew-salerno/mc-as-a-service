@@ -7,7 +7,7 @@ function spinny () {
     #weird formatting is because some stuff didn't show in my terminal
     chars=("/" "--\b" "\\" "|") 
     while true; do
-        for (( i=1; i<=${#chars}; i++ )); do
+        for (( i=0; i<${#chars}; i++ )); do
             sleep 0.5
             echo -ne "${chars[$i]}" "\r";
         done
