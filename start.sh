@@ -12,6 +12,8 @@ export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 shutdown () {
     echo "stop" > "$in_pipe"
     echo "`jobs -p`"
+    let "server_pid--"
+    #don't ask me why but jobs gives it a pid of 1 lower than it actually is
     if [ ! `jobs -p | grep "$server_pid"` == "" ]; then
         echo "waiting for server with PID ""$server_pid"" to shut down"
         spinny &
@@ -30,7 +32,7 @@ shutdown () {
 
 cleanup () {
     echo "cleaning up"
-    cat "" > "$out_log"
+    echo "" > "$out_log"
     echo "cleaned up"
 }
 

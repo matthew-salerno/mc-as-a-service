@@ -4,9 +4,16 @@ source "$SNAP"/bin/header.sh
 cleanup () {
     kill -KILL "$process"
     echo "Exited server view"
+    exit 0
 }
 
-trap cleanup EXIT SIGINT
+no_ctrl_c () {
+    echo -e "Type \"exit\" to leave"
+}
+
+
+trap cleanup EXIT
+trap no_ctrl_c SIGINT
 
 tail -f "$out_log" &
 process=$!
