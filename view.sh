@@ -6,7 +6,7 @@ function cleanup () {
 }
 
 tail -f "$out_log" &
-process=&!
+process=$!
 read
 while [ ! "$REPLY"="exit" ]; do
     echo "$REPLY" > "$in_pipe"
