@@ -11,12 +11,12 @@ export PATH="$JAVA_HOME""/bin:$JAVA_HOME/jre/bin:$PATH"
 
 shutdown () {
     echo "stop" > "$in_pipe"
-    if [ -n `jobs -p | grep "$server_pid"` ]; then
-        echo "waiting for server with PID""$server_pid""to shut down"
+    if [ ! `jobs -p | grep "$server_pid"` == "" ]; then
+        echo "waiting for server with PID ""$server_pid"" to shut down"
         spinny &
         spin_pid=$!
-        while [ -n `jobs -p | grep "$server_pid"` ]; do
-            echo -ne " Job running: ""`jobs -p | grep "$server_pid"`""          \r"
+        while [ ! `jobs -p | grep "$server_pid"` == "" ]; do
+            echo -ne " Jobs running: ""`jobs -p`""          \r"
             sleep 0.5
         done
         kill -KILL $spin_pid
