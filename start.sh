@@ -59,7 +59,7 @@ while true; do
         then break
     fi
 done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" &
-server_pid=&1
+server_pid=&!
 echo "Server is running "
 spinny
 #cleanup
