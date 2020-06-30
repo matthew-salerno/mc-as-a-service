@@ -15,8 +15,8 @@ spinny() {
 }
 
 #make sure config directory exists
-if [ ! -d "$SNAP_USER_DATA""/config" ]; then
-    mkdir "$SNAP_USER_DATA""/config"
+if [ ! -d "$SNAP_COMMON""/config" ]; then
+    mkdir "$SNAP_COMMON""/config"
 fi
 #make sure config exists
 if [ ! -f $config_path ]; then
