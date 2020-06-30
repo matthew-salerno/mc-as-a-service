@@ -56,7 +56,14 @@ fi
 #setup ramdisk
 #start the server
 echo -e "Starting server at ""$jarfile_path""\nwith initial memory of ""$mem_min"" and a max memory of ""$mem_max"
-java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" < "$in_pipe" &
+while true; do
+    temp=`cat "$in_pipe"`
+    echo $temp
+    #this part stops the loop when the server gets the stop command
+    if [ "$temp" = "stop" ]
+        then break
+    fi
+done | java -Xmx"$mem_max" -Xms"$mem_min" -jar "$jarfile_path" nogui >> "$out_log" &
 server_pid=$!
 echo "Server is running with PID of ""$server_pid"
 spinny
