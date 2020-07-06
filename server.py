@@ -13,23 +13,25 @@ loop = GLib.MainLoop()
 
 interface_name = "com.salernosection.mc_as_a_service.manager"
 this_path = os.path.dirname(os.path.abspath(__file__))
+
 if "SNAP" in os.environ:
-    output = os.environ["SNAP_COMMON"]+"/out.log"
-    server_dir_path = os.environ["SNAP_COMMON"]+"/server"
-    config_path = os.environ["SNAP_COMMON"]+"/mc-as-a-service-config.json"
-    server_jar_path = server_dir_path+"/server.jar"
-    properties_path = server_dir_path+"/server.properties"
-    working_directory = os.environ["SNAP_COMMON"]
+    root_path = os.environ["SNAP_COMMON"]
+    script_path = os.environ["SNAP"]
 else:
-    server_dir_path = f"{this_path}/server"
-    config_path = f"{this_path}/mc-as-a-service-config.json"
-    server_jar_path = server_dir_path+"/server.jar"
-    properties_path = server_dir_path+"/server.properties"
-    working_directory = this_path
-    output = working_directory+"/out.log"
-os.chdir(working_directory)
+    root_path = this_path
+    script_path = root_path
+
+working_directory = root_path
+server_dir_path = f"{root_path}/server"
+eula_path = f"{server_dir_path}/eula.txt"
+config_path = f"{root_path}/mc-as-a-service-config.json"
+server_jar_path = f"{server_dir_path}/server.jar"
+properties_path = f"{server_dir_path}/server.properties"
+output = f"{root_path}/out.log"
 ramdisk_path = server_dir_path+"/ramdisk"
 ramdisk_temp_path = server_dir_path+"/ramdisk_temp"
+
+os.chdir(working_directory)
 
 class manager(object):
     """Manages the various functions of a minecraft server, such as starting,
@@ -55,6 +57,9 @@ class manager(object):
                     <arg type='s' name='command' direction='in'/>
                     <arg type='b' name='success' direction='out'/>
                 </method>
+                <method name='set_eula'>
+                    <arg type='b' name='success' direction='out'/>
+                </method>
                 <method name='stop_service'/>
                 <property name='launch_path' type='s' access='readwrite'>
                     <annotation name='org.freedesktop.DBus.Property.EmitsChangedSignal' value='true'/>
@@ -65,10 +70,10 @@ class manager(object):
                 <property name='server_properties' type='a{ss}' access='readwrite'>
                     <annotation name='org.freedesktop.DBus.Property.EmitsChangedSignal' value='true'/>
                 </property>
-                <property name='eula' type='b' access='readwrite'>
+                <property name='ramdisk' type='b' access='readwrite'>
                     <annotation name='org.freedesktop.DBus.Property.EmitsChangedSignal' value='true'/>
                 </property>
-                <property name='ramdisk' type='b' access='readwrite'>
+                <property name='eula' type='b' access='read'>
                     <annotation name='org.freedesktop.DBus.Property.EmitsChangedSignal' value='true'/>
                 </property>
                 <property name='ramdisk_interval' type='u' access='readwrite'>
@@ -250,24 +255,33 @@ class manager(object):
     def eula(self):
         """
         Returns:
+            bool: whether or not the user has agreed to the eula
+        """
+        try:
+            eula_file = open(eula_path,"r")
+        except IOError:
+            return False
+        agree=False
+        for line in eula_file.readline():
+            if re.search("eula=true",line):
+                agree=True
+        eula_file.close()
+        return agree
+
+    def set_eula(self):
+        """
+        Returns:
             bool: returns whether or not the user has agreed to the eula
         """
-        return self._config_data["server"]["eula"]
-
-    @eula.setter
-    def eula(self, agree):
-        """signs the eula
-
-        Args:
-            agree (bool): whether or not the user agrees
-
-        Returns:
-            bool: true if option successfully changed, false otherwise
-        """
-        self._config_data["server"]["eula"] = agree
-        self.PropertiesChanged(interface_name,
-                               {"eula": self._config_data["server"]["eula"]},
-                               [])
+        try:
+            subprocess.run([script_path+"/eula.sh"],cwd=root_path,check=True)
+        except subprocess.CalledProcessError:
+            print("Did not agree to EULA")
+            agree = False 
+        else:
+            print("agreed to EULA")
+            agree = True
+        return agree
 
     @property
     def ramdisk(self):
@@ -310,6 +324,27 @@ class manager(object):
                                {"ramdisk_interval": self._config_data["ramdisk"]["interval"]},
                                [])
 
+    def install(self, version):
+        """installs the selected version of the minecraft server
+
+        Args:
+            version (str): the version of minecraft to install, as used in the
+            version manifest:
+            https://launchermeta.mojang.com/mc/game/version_manifest.json
+
+        Returns:
+            bool: true if installed, false otherwise
+        """
+        try:
+            subprocess.run(["/bin/bash",script_path+"/install_server.sh",version, server_jar_path],
+            cwd=root_path,check=True, stdout=root_path+"/install.log")
+        except subprocess.CalledProcessError:
+            print(f"Install process failed, see \"{root_path}/install.log\" for details")
+            return False 
+        else:
+            print("Installed server")
+            return True
+
     def start(self, timeout):
         """starts the server
         Args:
@@ -317,6 +352,9 @@ class manager(object):
         Returns:
             bool: true if the server started successfully, false otherwise
         """
+        if not self.eula:
+            print("You must agree to the eula to launch the server")
+            return False
         started = self._server_process.start(self.launch_options,self.launch_path,timeout)
         if started:
             if self.ramdisk:
