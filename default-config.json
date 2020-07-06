@@ -11,9 +11,6 @@
         "ramdisk":
         {
             "enabled":"false",
-            "size":"2G",
-            "can_outgrow_size":"false",
-            "file":"world_ramdisk",
             "interval":"0"
         }
 }

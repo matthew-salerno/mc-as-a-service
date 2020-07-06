@@ -439,7 +439,10 @@ class server():
             except subprocess.TimeoutExpired:
                 self._server.kill()
                 return False
-        self._server.stdin.close()
+        try:
+            self._server.stdin.close()
+        except AttributeError:
+            return False
         return True
 
     def start(self, options, path, timeout):
@@ -493,14 +496,14 @@ class ramdisk():
         self._server.send("save-all")
         sleep(0.1)
         self._server.send("save-off")
-        subprocess.run(["rsync","-a",ramdisk_path+"/*", self._world_path])
+        subprocess.run(["rsync","-rlptT", ramdisk_temp_path+"/*","--del",ramdisk_path+"/*", self._world_path])
         sleep(1)
         self._server.send("save-on")
         sleep(0.1)
         self._server.send("say server is done backing up ramdisk")
     def load(self):
-        subprocess.run(["rm","-rf", ramdisk_path+"/*"])
-        subprocess.run(["rsync","-rlptT", ramdisk_temp_path+"/*","--del",self._world_path, ramdisk_path])
+        subprocess.run(["/bin/rm","-rf", ramdisk_path+"/*"])
+        subprocess.run(["rsync","-rlptT", ramdisk_temp_path+"/*","--del",self._world_path+"/*", ramdisk_path])
 
 
 if __name__ == "__main__":
