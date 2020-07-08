@@ -1,2 +1,4 @@
 workspace.code-workspace
 mc-as-a-service-config.json
+helpers/__pycache__/comms.cpython-38.pyc
+server/*

@@ -1,5 +1,4 @@
-from helpers import shared
-from apps import comms
+from helpers import shared, comms
 from getopt import getopt, GetoptError
 
 const = shared.constants()
@@ -11,9 +10,15 @@ def main(arguments):
                                                "version"])
     except GetoptError:
         print(f"Wrong arguments, type {const.NAME} -h for help")
-    option_dict = {"-h": cmd_help, "-v": version, "-q": quiet,
-                   "--mc-version": comms.mc_version, "--help": cmd_help,
-                   "--quiet": quiet, "--version": version}
+    option_dict = {
+                "-h": cmd_help,
+                "-v": version,
+                "-q": quiet,
+                "--mc-version": comms.mc_version,
+                "--help": cmd_help, 
+                "--quiet": quiet,
+                "--version": version
+                }
     if opts:  # if not empty
         # for this particular application we don't need a case where
         # there are multiple options or option values
@@ -31,20 +36,28 @@ def quiet(*args):
 
 
 def args_processor(*args, quiet=False):
-    args_dict = {"start": comms.start, "stop": comms.stop,
-                 "ramdisk": comms.ramdisk, "property": comms.set_property,
-                 "launch-path": comms.set_path, "eula": comms.set_eula,
-                 "get-eula": comms.get_eula, "send": comms.send,
-                 "status": comms.status, "install": comms.install}
+    args_dict = {
+                "start": comms.start,
+                "stop": comms.stop,
+                "ramdisk": comms.ramdisk,
+                "property": comms.set_property,
+                "launch-path": comms.set_path,
+                "eula": comms.set_eula,
+                "get-eula": comms.get_eula,
+                "send": comms.send,
+                "status": comms.status,
+                "install": comms.install,
+                "launch-options": comms.launch_options
+                }
     if args:
         args_dict[args[0]](args[1:], no_output=quiet)
     else:
-        tui()
+        tui()  # TODO
 
 
 def cmd_help():
-    pass
+    pass  # TODO
 
 
 def tui():
-    pass
+    pass # TODO

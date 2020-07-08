@@ -1,4 +1,7 @@
-import shared
+if __name__ == "__main__":
+    import shared, eula, version_selector
+else:
+    from helpers import shared, eula, version_selector
 
 from gi.repository import GLib
 import subprocess
@@ -42,15 +45,12 @@ def set_eula(self):
     Returns:
         bool: returns whether or not the user has agreed to the eula
     """
-    try:
-        subprocess.run([const.APPS_PATH+"/eula.sh"], cwd=const.ROOT_PATH,
-                       check=True)
-    except subprocess.CalledProcessError:
-        print("Did not agree to EULA")
-        agree = False
-    else:
-        print("agreed to EULA")
+    if eula.eula_check():
+        printer("Signed EULA")
         agree = True
+    else:
+        printer("Unsigned EULA")
+        agree = False
     return agree
 
 
@@ -152,8 +152,10 @@ def set_property(self, key, value=None, printer=print):
     if value is None:
         if key in properties:
             del properties[key]
+            printer(f"Deleted property \"{key}\"")
     elif type(value) is str:
         properties[key] = value
+        printer(f"Property \"{key}\" is now \"{value}\"")
     else:
         raise TypeError("Value must be str or None")
     manager.server_properties = properties
@@ -171,7 +173,12 @@ def get_eula(self, *args, printer=print):
     Returns:
         bool: True if eula=true, false otherwise
     """
-    return manager.eula
+    if manager.eula:
+        printer("EULA is signed")
+        return True
+    else:
+        printer("EULA is not signed")
+        return False
 
 
 @quiet_print
@@ -190,6 +197,7 @@ def send(self, *args, printer=print):
     """
     seperator = " "
     argString = seperator.join(args)
+    printer(f"Sent command \"{' '.join(args)}\" to the server")
     return manager.send(argString)
 
 
@@ -204,7 +212,12 @@ def status(self, *args, printer=print):
     Returns:
         bool: True if the server is running, false if it is not
     """
-    return manager.status()
+    if manager.status():
+        printer("Server is running")
+        return True
+    else:
+        printer("Server is off")
+        return False
 
 
 @quiet_print
@@ -212,20 +225,33 @@ def install(self, *args, printer=print):
     """[summary]
 
     Args:
-        *args[1] (str, optional): The version to install,
+        *args[0] (str, optional): The version to install,
             opens up the TUI installer if not specified
         printer (function, optional): The function to
             display text. Defaults to print.
 
     Returns:
         bool: True if the install was successful, False otherwise 
+
+    Raises:
+        TypeError: When argument is not a string
     """
-    # TODO
-    pass
+    if args[0] is None:
+        version = version_select.select() #  TODO
+    elif type(args[0]) is str:
+        version = args[0]
+    else:
+        raise TypeError("Expected string as argument") 
+    if manager.install(version):
+        printer(f"Installed server of version {version}")
+        return True
+    else:
+        printer("Could not install server")
+        return False
 
 
 @quiet_print
-def path(self, *args, printer=print):
+def set_path(self, *args, printer=print):
     """sets the path to the server launcher, relative to the server folder
 
     Args:
@@ -236,6 +262,43 @@ def path(self, *args, printer=print):
 
     Returns:
         str: returns the server path after any changes were made
+    
+    Raises:
+        TypeError: Type error if the path is not a string
     """
-    # TODO
-    pass
+    if args[0] is None:
+        path = manager.launch_path
+        printer(f"Server launches from {path}")
+        return path
+    elif type(args[0]) is not str:
+        raise TypeError
+    path = args[0]
+    manager.launch_path = path
+    printer(f"Server now launches from {path}")
+    return path
+
+@quiet_print
+def launch_options(self, *args, printer=print):
+    """sets the path to the server launcher, relative to the server folder
+
+    Args:
+        *args (str, optional): The options to add
+        printer (function, optional): The function to
+            display text. Defaults to print.
+
+    Returns:
+        str: returns the launch options after any changes were made
+    
+    Raises:
+        TypeError: Type error if the options is not a list of strings
+    """
+    if not len(args):
+        options = manager.launch_options
+        printer(f"launch options are {'-'+' -'.join(options)}")
+        return options
+    if type(args) is not list:
+        if not all(isinstance(arg, str) for arg in args):
+            raise TypeError
+    manager.launch_options = args
+    printer(f"launch options changed to {'-'+' -'.join(args)}")
+    return args

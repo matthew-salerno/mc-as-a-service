@@ -1,4 +1,4 @@
-from helpers import shared
+from helpers import shared, installer
 import re
 import json
 import subprocess
@@ -278,15 +278,8 @@ class manager(object):
         Returns:
             bool: true if installed, false otherwise
         """
-        try:
-            subprocess.run(["/bin/bash", const.SERVICES_PATH +
-                            "/install_server.sh", version,
-                            const.SERVER_JAR_PATH],
-                           cwd=const.ROOT_PATH, check=True,
-                           stdout=const.ROOT_PATH+"/install.log")
-        except subprocess.CalledProcessError:
-            print(f"Install process failed, see \"{const.ROOT_PATH}" +
-                  "/install.log\" for details")
+        if installer.install_server(version) is None:
+            print("Install failed")
             return False
         else:
             self._config_data["server"]["version"] = version

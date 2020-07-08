@@ -24,21 +24,20 @@ class constants():
     @property
     def ROOT_PATH(self):
         if "SNAP" in environ:
-            return environ["SNAP_COMMON"]
+            return Path(environ["SNAP_COMMON"])
         else:
-            return Path.parent(Path.parent(Path(__file__).resolve))
-
+            return Path(__file__,'..','..').resolve()
     @property
     def SERVICES_PATH(self):
         if "SNAP" in environ:
-            return environ["SNAP"]/"services"
+            return Path(environ["SNAP"]/"services")
         else:
             return self.ROOT_PATH/"services"
 
     @property
     def APPS_PATH(self):
         if "SNAP" in environ:
-            return environ["SNAP"]/"apps"
+            return Path(environ["SNAP"]/"apps")
         else:
             return self.ROOT_PATH/"apps"
 
@@ -81,3 +80,7 @@ class constants():
     @property
     def MANIFEST_URL(self):
         return "https://launchermeta.mojang.com/mc/game/version_manifest.json"
+
+    @property
+    def EULA_URL(self):
+        return "https://account.mojang.com/documents/minecraft_eula"

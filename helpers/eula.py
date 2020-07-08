@@ -1,4 +1,7 @@
-import shared
+if __name__ == "__main__":
+    import shared
+else:
+    from helpers import shared
 import curses
 import urllib3
 import json
@@ -7,7 +10,7 @@ import textwrap
 from time import sleep
 from html.parser import HTMLParser
 
-http = urllib3.PoolManager()
+https = urllib3.PoolManager()
 const = shared.constants()
 
 # NOTE TODO: This file is a huge mess cobbled together quickly and without much thought.
@@ -79,7 +82,7 @@ class eula():
     def get_lines_formatted(self, cols):
         return ''.join(self.get_string(cols)).count('\n')
         
-class MyHTMLParser(HTMLParser):
+class EULA_HTML_Parser(HTMLParser):
     def __init__(self, print_func=print):
         super().__init__()
         self.display=print_func
@@ -174,8 +177,11 @@ def main(stdscr):
     curses.endwin()
     return agree
 
-if __name__ == "__main__":
+def eula_check():
     the_eula=eula()
-    parser = MyHTMLParser(the_eula.addstr)
-    parser.feed(http.request('GET',"https://account.mojang.com/documents/minecraft_eula").data.decode("utf-8"))
+    parser = EULA_HTML_Parser(the_eula.addstr)
+    parser.feed(https.request('GET',const.EULA_URL).data.decode("utf-8"))
     print(curses.wrapper(main))
+
+if __name__ == "__main__":
+    print(eula_check)
