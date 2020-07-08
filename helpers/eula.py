@@ -10,6 +10,16 @@ from html.parser import HTMLParser
 http = urllib3.PoolManager()
 const = shared.constants()
 
+# NOTE TODO: This file is a huge mess cobbled together quickly and without much thought.
+# I plan on eventually rewriting and documenting it but for now it is fairly low
+# priority. On a high level all it does is read the eula to the user and return
+# true or false depending on what they answer.
+# In short:
+# I know my O values are terible
+# I know this needs more comments
+# I know this is not readable
+# I will get around to it *eventually* 
+
 class eula():
     def __init__(self):
         self.strings=[""]
@@ -131,12 +141,10 @@ class MyHTMLParser(HTMLParser):
             self.display("/") if not start else ""
             self.display(tag)
             self.display(">")
-the_eula=eula()
-parser = MyHTMLParser(the_eula.addstr)
-parser.feed(http.request('GET',"https://account.mojang.com/documents/minecraft_eula").data.decode("utf-8"))
 
 def main(stdscr):
     pos = 0
+    agree = False
     curses.curs_set(0)
     stdscr.clear()
     curses.noecho()
@@ -145,16 +153,29 @@ def main(stdscr):
     eulapad = curses.newpad(the_eula.get_lines_formatted(curses.COLS-2)+1,curses.COLS-1)
     the_eula.curse_all(eulapad)
     while True:
+        stdscr.addstr(curses.LINES - 1,4,"I agree", curses.A_STANDOUT if agree else 0)
+        stdscr.addstr(curses.LINES - 1,curses.COLS-19,"I do not agree", 0 if agree else curses.A_STANDOUT)
         stdscr.refresh()
         eulapad.refresh(pos,0,1,1,curses.LINES - 2, curses.COLS - 1)
-        key = stdscr.getkey()
-        if key == "KEY_UP" and pos > 0:
+        key = stdscr.getch()
+        if key == curses.KEY_UP and pos > 0:
             pos -= 1
-        elif key == "KEY_DOWN" and pos < eulapad.getmaxyx()[0] - curses.LINES + 2:
+        elif key == curses.KEY_DOWN and pos < eulapad.getmaxyx()[0] - curses.LINES + 2:
             pos += 1
-        stdscr.addstr(curses.LINES - 1,0,"Pressed "+str(key))
+        elif key == curses.KEY_RIGHT:
+            agree = False
+        elif key == curses.KEY_LEFT:
+            agree = True
+        elif key == curses.KEY_ENTER or key == 10 or key == 13:
+            break
     curses.nocbreak()
     stdscr.keypad(False)
     curses.echo()
     curses.endwin()
-curses.wrapper(main)
+    return agree
+
+if __name__ == "__main__":
+    the_eula=eula()
+    parser = MyHTMLParser(the_eula.addstr)
+    parser.feed(http.request('GET',"https://account.mojang.com/documents/minecraft_eula").data.decode("utf-8"))
+    print(curses.wrapper(main))
