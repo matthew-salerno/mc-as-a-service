@@ -77,3 +77,7 @@ class constants():
     @property
     def XML_PATH(self):
         return self.SERVICES_PATH/"interface.xml"
+
+    @property
+    def MANIFEST_URL(self):
+        return "https://launchermeta.mojang.com/mc/game/version_manifest.json"

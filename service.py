@@ -1,4 +1,4 @@
-import helpers
+from helpers import shared
 import re
 import json
 import subprocess
@@ -9,7 +9,7 @@ from gi.repository import GLib
 from pydbus.generic import signal
 import pkg_resources
 
-const = helpers.constants()
+const = shared.constants()
 bus = UsedBus()
 loop = GLib.MainLoop()
 chdir(const.ROOT_PATH)

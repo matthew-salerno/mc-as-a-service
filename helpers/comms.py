@@ -1,12 +1,17 @@
-from helpers import constants
+import shared
 
+from gi.repository import GLib
 import subprocess
 from pydbus import SessionBus as UsedBus  # TODO: replace with system
 
 interface_name = "com.salernosection.mc_as_a_service.manager"
 bus = UsedBus()
-const = constants()
-manager = bus.get(const.INTERFACE)
+const = shared.constants()
+try:
+    manager = bus.get(const.INTERFACE)
+except GLib.Error:
+    print("error connecting to service")
+    exit(1)
 
 
 def blank():
@@ -94,17 +99,19 @@ def set_property(self, key, value=None, printer=print):
 
 @quiet_print
 def get_eula(self, *args, printer=print):
-    pass
+    return manager.eula
 
 
 @quiet_print
 def send(self, *args, printer=print):
-    pass
+    seperator = " "
+    argString = seperator.join(args)
+    return manager.send(argString)
 
 
 @quiet_print
 def status(self, *args, printer=print):
-    pass
+    return manager.status()
 
 
 @quiet_print

@@ -1,8 +1,8 @@
-from helpers import constants
+from helpers import shared
 from apps import comms
 from getopt import getopt, GetoptError
 
-const = constants()
+const = shared.constants()
 
 
 def main(arguments):
