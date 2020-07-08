@@ -33,7 +33,9 @@ class eula():
         return re.split('<|>',working_string)
     
     def curse_all(self, obj, pos=0):
-        for string in self.get_string(curses.COLS - 2):
+        num_rows, num_cols = obj.getmaxyx()
+
+        for string in self.get_string(num_cols - 1):
             
             if string in self.format:
                 self.format[string]=True
@@ -44,7 +46,11 @@ class eula():
                     self.format[string]=False
                 continue
             if self.format["h1"] or self.format["h2"]:
-                obj.addstr(string, curses.A_BOLD | curses.A_UNDERLINE)
+                half_length_of_message = int(len(string) / 2)
+                y_position = obj.getyx()[0]
+                middle_column = int(num_cols / 2)
+                x_position = middle_column - half_length_of_message
+                obj.addstr(y_position, x_position, string, curses.A_BOLD | curses.A_UNDERLINE)
             elif self.format["ul"] and self.format["strong"]:
                 obj.addstr(string, curses.A_UNDERLINE)
             elif self.format["ul"]:
@@ -55,18 +61,14 @@ class eula():
                 obj.addstr(string)
         obj.refresh(0,0,1,1,curses.LINES - 2, curses.COLS - 1)
             
-    
     def get_lines(self):
         lines=0
         for string in self.strings:
             lines += string.count('\n')
         return lines
-    def get_lines_formatted(self, cols):  # NOTE: this may return a value larger than the real number of lines
-        text = ''.join(self.strings)
-        text = textwrap.fill(text, cols, replace_whitespace=False)
-        return text.count('\n')
+    def get_lines_formatted(self, cols):
+        return ''.join(self.get_string(cols)).count('\n')
         
-
 class MyHTMLParser(HTMLParser):
     def __init__(self, print_func=print):
         super().__init__()
@@ -129,7 +131,6 @@ class MyHTMLParser(HTMLParser):
             self.display("/") if not start else ""
             self.display(tag)
             self.display(">")
-
 the_eula=eula()
 parser = MyHTMLParser(the_eula.addstr)
 parser.feed(http.request('GET',"https://account.mojang.com/documents/minecraft_eula").data.decode("utf-8"))
@@ -141,11 +142,8 @@ def main(stdscr):
     curses.noecho()
     curses.cbreak()
     stdscr.keypad(True)
-    print(str(the_eula.get_lines_formatted(curses.COLS-5))+"\n\n")
-    eulapad = curses.newpad(the_eula.get_lines_formatted(curses.COLS-3),curses.COLS)
-    
+    eulapad = curses.newpad(the_eula.get_lines_formatted(curses.COLS-2)+1,curses.COLS-1)
     the_eula.curse_all(eulapad)
-    
     while True:
         stdscr.refresh()
         eulapad.refresh(pos,0,1,1,curses.LINES - 2, curses.COLS - 1)
@@ -155,9 +153,6 @@ def main(stdscr):
         elif key == "KEY_DOWN" and pos < eulapad.getmaxyx()[0] - curses.LINES + 2:
             pos += 1
         stdscr.addstr(curses.LINES - 1,0,"Pressed "+str(key))
-        
-    
-
     curses.nocbreak()
     stdscr.keypad(False)
     curses.echo()
