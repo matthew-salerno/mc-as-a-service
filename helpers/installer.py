@@ -23,7 +23,7 @@ def install_server(version):
     server_jar = download(server_url, const.SERVER_JAR_PATH, sha1_https)
     return server_jar
 
-# TODO
+
 def download(url, path, sha1_https=None):
     url_stream = https.request('GET', url, preload_content=False)
     sha1_file = hashlib.sha1()
@@ -55,4 +55,4 @@ def download(url, path, sha1_https=None):
         return path
 
 if __name__ == "__main__":
-    install_server("1.16.1")
+    install_server("release")

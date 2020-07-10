@@ -9,10 +9,10 @@ import urllib3
 const = shared.constants()
 https = urllib3.PoolManager()
 
-def select():
-    versions = version_list()
+def select(branch="all"):
+    versions = version_list(branch)
     return curses.wrapper(versions.display)
-class version_list():
+class version_list(branch="all"):
     def __init__(self):
         self._version_list=[]
         self._selected = 0
@@ -30,10 +30,16 @@ class version_list():
         while True:
             stdscr.erase()
             for i in range(self._window[0], self._window[1]):
+                # Get centered position
+                half_length_of_message = int(len(self._version_list[i]) / 2)
+                y_position = stdscr.getyx()[0]
+                middle_column = int(cols / 2)
+                x_position = middle_column - half_length_of_message
+                # Print
                 if self._selected == i:
-                    stdscr.addstr(self._version_list[i]+"\n", curses.A_STANDOUT)
+                    stdscr.addstr(y_position, x_position,self._version_list[i]+"\n", curses.A_STANDOUT)
                 else:
-                    stdscr.addstr(self._version_list[i]+"\n")
+                    stdscr.addstr(y_position, x_position,self._version_list[i]+"\n")
             stdscr.refresh()
             key = stdscr.getch()
             keydict = {

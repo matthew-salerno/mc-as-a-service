@@ -40,7 +40,7 @@ def quiet_print(func):
 
 
 @quiet_print
-def set_eula(self):
+def set_eula(self, *args, printer=print):
     """
     Returns:
         bool: returns whether or not the user has agreed to the eula
@@ -237,7 +237,7 @@ def install(self, *args, printer=print):
         TypeError: When argument is not a string
     """
     if args[0] is None:
-        version = version_select.select() #  TODO
+        version = version_selector.select()
     elif type(args[0]) is str:
         version = args[0]
     else:
