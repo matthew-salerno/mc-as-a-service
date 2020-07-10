@@ -120,7 +120,7 @@ class list_editor():
             elif key == curses.KEY_ENTER or key == 10 or key == 13:
                 edit = 1
 
-                
+
 class select_h():
     def __init__(self, items, title=""):
         self.items = items
@@ -253,5 +253,4 @@ class select_v_scrolling():
                 self._window[1] += 1
                 self._selected += 1
         else:
-            self._selected += 1
-class 
+            self._selected += 1 
