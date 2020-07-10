@@ -88,3 +88,12 @@ class constants():
     @property
     def EULA_URL(self):
         return "https://account.mojang.com/documents/minecraft_eula"
+
+def str2bool(string):
+    if isinstance(string,str):
+        if string.lower() in ["true", "on", "yes","1", "t"]:
+            return True
+        elif string.lower() in ["false", "off", "no", "0", "f"]:
+            return False
+    else:
+        raise TypeError

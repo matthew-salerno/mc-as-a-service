@@ -23,12 +23,7 @@ def blank():
 def _str2bool(string):
     enabled = None
     if type(string) is str:
-        if string.lower() in ["true", "on", "yes","1"]:
-            enabled = True
-        elif string.lower() in ["false", "off", "no", "0"]:
-            enabled = False
-        else:
-            raise TypeError("Could not cast given value as bool")
+        enabled = shared.str2bool(string)
     elif not isinstance(string,(bool,int,float)):
         raise TypeError("Could not understand type given")
     return bool(enabled)
