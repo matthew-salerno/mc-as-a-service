@@ -20,6 +20,18 @@ except GLib.Error:
 def blank():
     pass
 
+def _str2bool(string):
+    enabled = None
+    if type(string) is str:
+        if string.lower() in ["true", "on", "yes","1"]:
+            enabled = True
+        elif string.lower() in ["false", "off", "no", "0"]:
+            enabled = False
+        else:
+            raise TypeError("Could not cast given value as bool")
+    elif not isinstance(string,(bool,int,float)):
+        raise TypeError("Could not understand type given")
+    return bool(enabled)
 
 def quiet_print(func):
     """All this decorator does is supply a function for printing which
@@ -127,7 +139,8 @@ def ramdisk(self, *args, printer=print):
         bool: the state of the ramdisk after any changes
     """
     if args:
-        manager.ramdisk = args[0]
+        enabled = _str2bool(args[0])
+        manager.ramdisk = enabled
     else:
         printer("ramdisk is "+("on" if manager.ramdisk else "off"))
     return manager.ramdisk

@@ -1,6 +1,6 @@
 from helpers import shared, comands
 from getopt import getopt, GetoptError
-
+import pkg_resources
 const = shared.constants()
 
 
@@ -40,7 +40,7 @@ def args_processor(*args, quiet=False):
                 "start": comands.start,
                 "stop": comands.stop,
                 "ramdisk": comands.ramdisk,
-                "property": comands.set_property,
+                "set-property": comands.set_property,
                 "launch-path": comands.set_path,
                 "eula": comands.set_eula,
                 "get-eula": comands.get_eula,
@@ -56,7 +56,9 @@ def args_processor(*args, quiet=False):
 
 
 def cmd_help():
-    pass  # TODO
+    helpstring =  (pkg_resources.resource_string(__name__, const.HELP_PATH).decode("utf-8"))
+    print(f"{const.NAME}: Version {const.VERSION}")
+    print(helpstring)
 
 
 def tui():
