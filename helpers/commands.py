@@ -1,10 +1,11 @@
 if __name__ == "__main__":
-    import shared, eula, version_selector
+    import shared, eula, version_selector, curses_helpers
 else:
-    from helpers import shared, eula, version_selector
-
+    from helpers import shared, eula, version_selector, curses_helpers
+import curses
 from gi.repository import GLib
 import subprocess
+from copy import deepcopy
 from pydbus import SessionBus as UsedBus  # TODO: replace with system
 
 interface_name = "com.salernosection.mc_as_a_service.manager"
@@ -17,52 +18,25 @@ except GLib.Error:
     exit(1)
 
 
-def blank():
+def blank(*args, **kwargs):
     pass
 
-def _str2bool(string):
-    enabled = None
-    if type(string) is str:
-        enabled = shared.str2bool(string)
-    elif not isinstance(string,(bool,int,float)):
-        raise TypeError("Could not understand type given")
-    return bool(enabled)
-
-def quiet_print(func):
-    """All this decorator does is supply a function for printing which
-    prints nothing if no_output is true
-
-    Args:
-        func (function): the function to apply this decorator to
-    """
-    def inner(*args, **kwargs):
-
-        if not kwargs["no_output"]:
-            qprint = print
-        else:
-            qprint = blank
-        del kwargs["no_output"]
-        func(*args, **kwargs, printer=qprint)
-    return inner
-
-
-@quiet_print
-def set_eula(self, *args, printer=print):
+def set_eula(args=[], printer=print):
     """
     Returns:
         bool: returns whether or not the user has agreed to the eula
     """
-    if eula.eula_check():
+    if curses.wrapper(eula.eula_check):
         printer("Signed EULA")
         agree = True
     else:
         printer("Unsigned EULA")
         agree = False
+    manager.eula = agree
     return agree
 
 
-@quiet_print
-def mc_version(self, *args, printer=print):
+def mc_version(args=[], printer=print):
     """Returns the minecraft game version
 
     Args:
@@ -77,8 +51,8 @@ def mc_version(self, *args, printer=print):
     return mc_version
 
 
-@quiet_print
-def start(self, *args, printer=print):
+
+def start(args=[], printer=print):
     """Tells the minecraft server to start
 
     Args:
@@ -88,7 +62,7 @@ def start(self, *args, printer=print):
     Returns:
         bool: whether the start was successful
     """
-    started = manager.start()
+    started = manager.start(30)
     if started:
         printer("Started server")
     else:
@@ -96,8 +70,8 @@ def start(self, *args, printer=print):
     return started
 
 
-@quiet_print
-def stop(self, *args, printer=print):
+
+def stop(args=[], printer=print):
     """Tells the minecraft server to stop
 
     Args:
@@ -107,7 +81,7 @@ def stop(self, *args, printer=print):
     Returns:
         bool: whether the server successfully stopped
     """
-    stopped = manager.stop()
+    stopped = manager.stop(30)
     if stopped:
         printer("Stopped server")
     else:
@@ -115,8 +89,8 @@ def stop(self, *args, printer=print):
     return stopped
 
 
-@quiet_print
-def ramdisk(self, *args, printer=print):
+
+def ramdisk(args=[], printer=print):
     """Changes the ramdisk option in the server config
     NOTE: This does not create a ramdisk, it simply
     assumes you have mounted a ramdisk to the ramdisk
@@ -134,15 +108,15 @@ def ramdisk(self, *args, printer=print):
         bool: the state of the ramdisk after any changes
     """
     if args:
-        enabled = _str2bool(args[0])
+        enabled = shared.str2bool(args[0])
         manager.ramdisk = enabled
     else:
         printer("ramdisk is "+("on" if manager.ramdisk else "off"))
     return manager.ramdisk
 
 
-@quiet_print
-def set_property(self, key, value=None, printer=print):
+
+def set_property(key, value=None, printer=print):
     """sets a property in server.properties
 
     Args:
@@ -169,8 +143,8 @@ def set_property(self, key, value=None, printer=print):
     manager.server_properties = properties
 
 
-@quiet_print
-def get_eula(self, *args, printer=print):
+
+def get_eula(args=[], printer=print):
     """Returns whether or not the eula has been
     agreed to
 
@@ -189,8 +163,8 @@ def get_eula(self, *args, printer=print):
         return False
 
 
-@quiet_print
-def send(self, *args, printer=print):
+
+def send(args=[], printer=print):
     """Sends a command to the minecraft server
 
     Args:
@@ -209,8 +183,8 @@ def send(self, *args, printer=print):
     return manager.send(argString)
 
 
-@quiet_print
-def status(self, *args, printer=print):
+
+def status(args=[], printer=print):
     """Returns the status of the Minecraft server
 
     Args:
@@ -228,8 +202,8 @@ def status(self, *args, printer=print):
         return False
 
 
-@quiet_print
-def install(self, *args, printer=print):
+
+def install(args=[], printer=print):
     """[summary]
 
     Args:
@@ -244,7 +218,7 @@ def install(self, *args, printer=print):
     Raises:
         TypeError: When argument is not a string
     """
-    if args[0] is None:
+    if not args:
         version = version_selector.select()
     elif type(args[0]) is str:
         version = args[0]
@@ -258,8 +232,8 @@ def install(self, *args, printer=print):
         return False
 
 
-@quiet_print
-def set_path(self, *args, printer=print):
+
+def set_path(args=[], printer=print):
     """sets the path to the server launcher, relative to the server folder
 
     Args:
@@ -274,7 +248,7 @@ def set_path(self, *args, printer=print):
     Raises:
         TypeError: Type error if the path is not a string
     """
-    if args[0] is None:
+    if len(args) == 0:
         path = manager.launch_path
         printer(f"Server launches from {path}")
         return path
@@ -285,8 +259,8 @@ def set_path(self, *args, printer=print):
     printer(f"Server now launches from {path}")
     return path
 
-@quiet_print
-def launch_options(self, *args, printer=print):
+
+def launch_options(args=[], printer=print):
     """sets the path to the server launcher, relative to the server folder
 
     Args:
@@ -302,11 +276,58 @@ def launch_options(self, *args, printer=print):
     """
     if not len(args):
         options = manager.launch_options
-        printer(f"launch options are {'-'+' -'.join(options)}")
+        if manager.launch_options == []:
+            printer("Server uses no launch options")
+        else:
+            printer(f"launch options are {'-'+' -'.join(options)}")
         return options
-    if type(args) is not list:
+    if type(args[0]) is not list:
         if not all(isinstance(arg, str) for arg in args):
             raise TypeError
-    manager.launch_options = args
-    printer(f"launch options changed to {'-'+' -'.join(args)}")
+        if args[0].strip() == "":
+            manager.launch_options = []
+        else:
+            manager.launch_options = args
+    else:
+        manager.launch_options = args[0]
+        printer(f"launch options changed to {'-'+' -'.join(args[0])}")
+    
     return args
+
+
+def connect(args=[], printer=print):
+    """TODO
+    """
+    printer("Not implemented")
+
+def tui_launch_options(**kwargs):
+    items = [curses_helpers.item_editor("Launch Path", set_path(printer=blank)),
+             curses_helpers.item_editor("Launch Options"," ".join(launch_options(printer=blank))),
+             curses_helpers.item_editor("Ramdisk",ramdisk(printer=blank))]
+    menu = curses_helpers.list_editor(items)
+    changes = curses.wrapper(menu.display)
+    for change in changes:
+        if change[0] == "Launch Path":
+            set_path(change[1], printer=blank)
+        elif change[0] == "Launch Options":
+            launch_options(change[1].split(), printer=blank)
+        elif change[0] == "Ramdisk":
+            ramdisk(change[1], printer=blank)
+
+def tui_server_options(**kwargs):
+    options = manager.server_properties
+    new_options = deepcopy(options)
+    default_options = manager.server_default_properties
+    opt_list = []
+    for option in default_options:
+        if not option in options:
+            opt_list.append(curses_helpers.item_editor(option, default_options[option]))
+    for option in options: 
+        opt_list.append(curses_helpers.item_editor(option, options[option]))
+    sorter = lambda x: x.name
+    opt_list.sort(key=sorter)
+    items = curses_helpers.list_editor(opt_list)
+    changed_list = curses.wrapper(items.display)
+    for item in changed_list:
+        new_options[item[0]] = item[1]
+    manager.server_properties = new_options

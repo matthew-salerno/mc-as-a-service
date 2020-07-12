@@ -2,10 +2,47 @@ import curses
 from curses.textpad import Textbox, rectangle
 
 
-class item_editor():
+class item_base():
+    def __init__(self):
+        pass
+    
+    def init_curses(self):
+        curses.noecho()
+        curses.cbreak()
+        curses.curs_set(0)
+
+    def display(self, y_pos, key_x, value_x, stdscr, selected, formatting=0):
+        pass
+
+
+class item_title(item_base):
+    def __init__(self, title, on_change=None):
+        self.title = title
+        self.max_len = 0
+        self.name = title
+    def display(self, y_pos, stdscr, selected, formatting=0):
+        self.init_curses()
+        rows, cols = stdscr.getmaxyx()
+        window = curses.newwin(1,len(self.title)+1,y_pos,int((cols/2)-len(self.title)/2))
+        padding = curses.newwin(1,cols,y_pos,0)
+        padding.erase()
+        padding.addstr(" "*(cols-1))
+        padding.refresh()
+        window.erase()
+        window.addstr(0,0,self.title, formatting)
+        window.refresh()
+        del window
+        del padding
+        if selected:
+            return self.title
+        return None
+
+
+class item_editor(item_base):
     def __init__(self, key, value, on_change=None, max_val_len=20):
         self.key=key
         self.value=value
+        self.name = key
         if type(value) is str:
             self.validation = self.str_validator
         elif type(value) is int:
@@ -14,10 +51,8 @@ class item_editor():
             self.validation = self.float_validator
         self.max_val_len = max_val_len
     def display(self, y_pos, key_x, value_x, stdscr, selected, formatting=0):
-        curses.noecho()
-        curses.cbreak()
-        curses.curs_set(0)
-        key_window=curses.newwin(1,len(self.key)+1,y_pos,key_x)
+        self.init_curses()
+        key_window=curses.newwin(1,value_x-key_x,y_pos,key_x)
         value_window=curses.newwin(1,self.max_val_len,y_pos,value_x)
         changed=False
         if selected:
@@ -29,6 +64,7 @@ class item_editor():
                 self.box.edit(self.validation)
                 self.box=None
             changed=True
+        key_window.erase()
         key_window.addstr(0,0,self.key, formatting)
         value_window.erase()
         value_window.addstr(str(self.value), formatting)
@@ -36,7 +72,7 @@ class item_editor():
         value_window.refresh()
         del key_window
         del value_window
-        return self.value if changed else None
+        return (self.key,self.value) if changed else None
     
     def str_validator(self, key):
         if self.box == None:
@@ -75,7 +111,9 @@ class item_editor():
         elif key == curses.KEY_BACKSPACE or key == 127:
             return 8
         elif key == curses.KEY_ENTER or key == 10 or key == 13:
-            self.value=int(self.box.gather().strip())
+            in_val = self.box.gather().strip()
+            if in_val != "":
+                self.value=int(in_val)
             return curses.ascii.BEL
         if key in range(48,58):  # allowed values
             return key
@@ -95,30 +133,131 @@ class item_editor():
                 self.value = value
                 return value
 
-class list_editor():
+class list_base():
     def __init__(self, items):
-        self.itemlist = items
-        self.items = []
+        self.items = items
+        self.selected = 0
+        self.returnVal = None
+        
+    
     def display(self, stdscr):
-        for item in self.itemlist:
-            self.items.append(item_editor(item[0],item[1]))
-        keylength = max(map(len, (item[0] for item in self.itemlist)))
-        middle_col = int(stdscr.getmaxyx()[1]/2)
+        self.rows, self.cols = stdscr.getmaxyx()
+        self.middle_col = int(self.cols/2)
+        self.start = 0
         stdscr.erase()
         stdscr.refresh()
-        selected = 0
-        edit = 0
+        self.pre_loop(stdscr)
         while True:
-            for i in range(len(self.items)):
-                self.items[i].display(i,middle_col-(keylength+2),middle_col+2,stdscr, i==selected and edit, curses.A_STANDOUT if i==selected else 0)
-            edit = 0
-            key = stdscr.getch()
-            if key == curses.KEY_DOWN:
-                selected = (selected + 1)%len(self.items)
-            elif key == curses.KEY_UP:
-                selected = (selected - 1)%len(self.items)
-            elif key == curses.KEY_ENTER or key == 10 or key == 13:
-                edit = 1
+            self.rows, self.cols = stdscr.getmaxyx()
+            if not self.loop(stdscr):
+                break
+            if not self.get_key(stdscr):
+                break
+        self.post_loop(stdscr)
+        return self.returnVal
+    
+    def pre_loop(self, stdscr):
+        pass
+    
+    def loop(self, stdscr):
+        return True
+    
+    def post_loop(self, stdscr):
+        pass
+    
+    def get_key(self, stdscr):
+        key = stdscr.getch()
+        if key == curses.KEY_DOWN:
+            self.key_down()
+        elif key == curses.KEY_UP:
+            self.key_up()
+        if key in [curses.KEY_ENTER, 10, 13]:
+            return self.key_enter()
+        elif key == 27:
+            return False
+        else:
+            return True
+    
+    def key_enter(self):
+        return True
+    
+    def key_up(self):
+        return self.sel_up()
+
+    def key_down(self):
+        return self.sel_down()
+    
+    def sel_up(self):
+        if self.selected == self.start:
+            if self.start > 0:
+                self.start -= 1
+                self.selected -= 1
+            else:
+                self.selected = len(self.items)-1
+                self.start = max(0,len(self.items)-self.rows)
+        else:
+            self.selected -= 1
+
+    def sel_down(self):
+        if self.selected + 1 >= self.rows + self.start or self.selected >= len(self.items) - 1:
+            if ((self.start + self.rows < len(self.items)) and (self.selected < len(self.items))):
+                self.start += 1
+                self.selected += 1
+            else:
+                self.selected = 0
+                self.start = 0
+        else:
+            self.selected += 1 
+
+class list_editor(list_base):
+    def __init__(self, items):
+        super().__init__(items)
+        self.keylength = (
+            max(
+                map(
+                    len,
+                    (
+                        (x.key if type(x) is item_editor else "" for x in self.items)
+                    )
+                   )
+               )
+        )
+        self.edit = False
+        return
+    
+    def pre_loop(self, stdscr):
+        self.returnVal = []
+        return
+
+    def loop(self, stdscr):
+        for i in range(len(self.items)):
+            if i >= self.start and i <= self.start + self.rows:
+                if type(self.items[i]) is item_editor:
+                    setting = self.items[i].display(
+                                (i-self.start),
+                                (self.middle_col-(self.keylength+2)),
+                                (self.middle_col+2),
+                                (stdscr),
+                                (i==self.selected and self.edit),
+                                (curses.A_STANDOUT if i==self.selected else 0))
+                elif type(self.items[i]) is item_title:
+                    self.items[i].display(
+                                (i-self.start),
+                                (stdscr),
+                                (False),
+                                (curses.A_STANDOUT if i==self.selected else 0))
+            else:
+                setting = None
+            if type(setting) is tuple:
+                self.returnVal.append(setting) # if changed, append new setting
+        self.edit = False
+        return True
+
+
+    def key_enter(self):
+        self.edit = True
+        return True
+
 
 
 class select_h():
@@ -158,6 +297,8 @@ class select_h():
                 selected = (selected - 1)%len(self.items)
             elif key == curses.KEY_ENTER or key == 10 or key == 13:
                         return self.items[selected]
+            elif key == 27:  # escape
+                return None
 
 class select_v():
     def __init__(self, items, title=""):
@@ -172,7 +313,7 @@ class select_v():
             rows, cols = stdscr.getmaxyx()
             middle_row = int(rows / 2)
             middle_column = int(cols / 2)
-            top_row = middle_row-(len(self.items)/2)
+            top_row = int(middle_row-(len(self.items)/2))
             half_length_of_message = int(len(self.title) / 2)
             x_position = middle_column - half_length_of_message
             stdscr.erase()
@@ -196,6 +337,8 @@ class select_v():
                 selected = (selected - 1)%len(self.items)
             elif key == curses.KEY_ENTER or key == 10 or key == 13:
                         return self.items[selected]
+            elif key == 27:  # escape
+                return None
 
 class select_v_scrolling():
     def __init__(self, items, title=""):
@@ -234,8 +377,10 @@ class select_v_scrolling():
                 }
             if key in keydict:
                 keydict[key]()
-            if key == curses.KEY_ENTER or key == 10 or key == 13:
+            elif key in [curses.KEY_ENTER, 10, 13]:
                 return self.items[self._selected]
+            elif key == 27:  # escape
+                return None
     
     def key_up(self):
         if self._window[0] == self._selected:
@@ -254,3 +399,21 @@ class select_v_scrolling():
                 self._selected += 1
         else:
             self._selected += 1 
+
+if __name__ == "__main__":
+    ed = list_editor([item_editor("one",1),
+                      item_editor("Two","2"),
+                      item_editor("Three",False),
+                      item_editor("Two","2"),
+                      item_editor("Three",False),
+                      item_editor("Two","2"),
+                      item_title("TITLE"),
+                      item_editor("Three",False),
+                      item_editor("Two","2"),
+                      item_editor("Three",False),
+                      item_editor("Two","2"),
+                      item_editor("Three",False),
+                      item_editor("Two","2"),
+                      item_editor("Three",False),
+                      item_editor("Four",True)])
+    curses.wrapper(ed.display)

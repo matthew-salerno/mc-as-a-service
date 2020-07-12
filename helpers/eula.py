@@ -45,8 +45,9 @@ class eula():
         working_string = '\n'.join(formatted_split)
         return re.split('<|>',working_string)
     
-    def curse_all(self, obj, pos=0):
-        num_rows, num_cols = obj.getmaxyx()
+    def curse_all(self, obj, stdscr, pos=0):
+        num_cols = obj.getmaxyx()[1]
+        lines, cols = stdscr.getmaxyx()
 
         for string in self.get_string(num_cols - 1):
             
@@ -72,7 +73,7 @@ class eula():
                 obj.addstr(string, curses.A_BOLD)
             else:
                 obj.addstr(string)
-        obj.refresh(0,0,1,1,curses.LINES - 2, curses.COLS - 1)
+        obj.refresh(0,0,1,1,lines - 2, cols - 1)
             
     def get_lines(self):
         lines=0
@@ -145,7 +146,11 @@ class EULA_HTML_Parser(HTMLParser):
             self.display(tag)
             self.display(">")
 
-def main(stdscr):
+def eula_check(stdscr):
+    lines, cols = stdscr.getmaxyx()
+    the_eula=eula()
+    parser = EULA_HTML_Parser(the_eula.addstr)
+    parser.feed(https.request('GET',const.EULA_URL).data.decode("utf-8"))
     pos = 0
     agree = False
     curses.curs_set(0)
@@ -154,16 +159,16 @@ def main(stdscr):
     curses.cbreak()
     stdscr.keypad(True)
     eulapad = curses.newpad(the_eula.get_lines_formatted(curses.COLS-2)+1,curses.COLS-1)
-    the_eula.curse_all(eulapad)
+    the_eula.curse_all(eulapad,stdscr)
     while True:
-        stdscr.addstr(curses.LINES - 1,4,"I agree", curses.A_STANDOUT if agree else 0)
-        stdscr.addstr(curses.LINES - 1,curses.COLS-19,"I do not agree", 0 if agree else curses.A_STANDOUT)
+        stdscr.addstr(lines - 1,4,"I agree", curses.A_STANDOUT if agree else 0)
+        stdscr.addstr(lines - 1, cols - 19,"I do not agree", 0 if agree else curses.A_STANDOUT)
         stdscr.refresh()
-        eulapad.refresh(pos,0,1,1,curses.LINES - 2, curses.COLS - 1)
+        eulapad.refresh(pos,0,1,1,lines - 2, cols - 1)
         key = stdscr.getch()
         if key == curses.KEY_UP and pos > 0:
             pos -= 1
-        elif key == curses.KEY_DOWN and pos < eulapad.getmaxyx()[0] - curses.LINES + 2:
+        elif key == curses.KEY_DOWN and pos < eulapad.getmaxyx()[0] - lines + 2:
             pos += 1
         elif key == curses.KEY_RIGHT:
             agree = False
@@ -177,11 +182,5 @@ def main(stdscr):
     curses.endwin()
     return agree
 
-def eula_check():
-    the_eula=eula()
-    parser = EULA_HTML_Parser(the_eula.addstr)
-    parser.feed(https.request('GET',const.EULA_URL).data.decode("utf-8"))
-    print(curses.wrapper(main))
-
 if __name__ == "__main__":
-    print(eula_check)
+    print(curses.wrapper(eula_check))

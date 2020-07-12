@@ -27,19 +27,6 @@ class constants():
             return Path(environ["SNAP_COMMON"])
         else:
             return Path(__file__,'..','..').resolve()
-    @property
-    def SERVICES_PATH(self):
-        if "SNAP" in environ:
-            return Path(environ["SNAP"]/"services")
-        else:
-            return self.ROOT_PATH/"services"
-
-    @property
-    def APPS_PATH(self):
-        if "SNAP" in environ:
-            return Path(environ["SNAP"]/"apps")
-        else:
-            return self.ROOT_PATH/"apps"
 
     @property
     def SERVER_DIR_PATH(self):
@@ -56,6 +43,13 @@ class constants():
     @property
     def CONFIG_PATH(self):
         return self.ROOT_PATH/"config.json"
+
+    @property
+    def DEFAULT_CONFIG_PATH(self):
+        if "SNAP" in environ:
+            return Path(environ["SNAP"])
+        else:
+            return self.ROOT_PATH/"default_config.json"
 
     @property
     def PROPERTIES_PATH(self):
@@ -75,11 +69,11 @@ class constants():
 
     @property
     def XML_PATH(self):
-        return self.SERVICES_PATH/"interface.xml"
+        return self.ROOT_PATH/"interface.xml"
     
     @property
     def HELP_PATH(self):
-        return self.SERVICES_PATH/"help.txt"
+        return self.ROOT_PATH/"help.txt"
 
     @property
     def MANIFEST_URL(self):
@@ -95,5 +89,7 @@ def str2bool(string):
             return True
         elif string.lower() in ["false", "off", "no", "0", "f"]:
             return False
+    elif isinstance(string,bool):
+        return string
     else:
         raise TypeError

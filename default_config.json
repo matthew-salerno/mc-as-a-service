@@ -1,0 +1,27 @@
+{
+    "launcher":
+    {
+            "launch_path":"server.jar",
+            "options":
+            [
+
+            ]
+    },
+    "server":
+    {
+        "version":"",
+        "properties":
+        {
+
+        },
+        "default_properties":
+        {
+
+        }
+    },
+    "ramdisk":
+    {
+        "enabled":false,
+        "interval":15
+    }
+}

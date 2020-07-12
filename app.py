@@ -1,6 +1,8 @@
-from helpers import shared, comands
+from helpers import shared, commands, curses_helpers
 from getopt import getopt, GetoptError
 import pkg_resources
+import curses
+import sys
 const = shared.constants()
 
 
@@ -14,7 +16,7 @@ def main(arguments):
                 "-h": cmd_help,
                 "-v": version,
                 "-q": quiet,
-                "--mc-version": comms.mc_version,
+                "--mc-version": commands.mc_version,
                 "--help": cmd_help, 
                 "--quiet": quiet,
                 "--version": version
@@ -27,39 +29,60 @@ def main(arguments):
         args_processor(args)
 
 
-def version(*args):
+def version(args):
     print(const.VERSION)
 
 
-def quiet(*args):
+def quiet(args):
     args_processor(args, True)
 
 
-def args_processor(*args, quiet=False):
+def args_processor(args, quiet=False):
     args_dict = {
-                "start": comands.start,
-                "stop": comands.stop,
-                "ramdisk": comands.ramdisk,
-                "set-property": comands.set_property,
-                "launch-path": comands.set_path,
-                "eula": comands.set_eula,
-                "get-eula": comands.get_eula,
-                "send": comands.send,
-                "status": comands.status,
-                "install": comands.install,
-                "launch-options": comands.launch_options
+                "start": commands.start,
+                "stop": commands.stop,
+                "ramdisk": commands.ramdisk,
+                "set-property": commands.set_property,
+                "launch-path": commands.set_path,
+                "eula": commands.set_eula,
+                "get-eula": commands.get_eula,
+                "send": commands.send,
+                "status": commands.status,
+                "install": commands.install,
+                "launch-options": commands.launch_options,
+                "connect": commands.connect
                 }
-    if args:
-        args_dict[args[0]](args[1:], no_output=quiet)
+    if len(args):
+        if args[0] in args_dict:
+            args_dict[args[0]](args[1:], printer=(commands.blank if quiet else print))
+        else:
+            print("No command found!")
     else:
-        tui()  # TODO
+        tui()
 
 
-def cmd_help():
-    helpstring =  (pkg_resources.resource_string(__name__, const.HELP_PATH).decode("utf-8"))
+def cmd_help(args):
+    helpstring = pkg_resources.resource_string(__name__, const.HELP_PATH.name).decode("utf-8")
     print(f"{const.NAME}: Version {const.VERSION}")
     print(helpstring)
 
 
 def tui():
-    pass # TODO
+    while True:
+        menu_items = {
+                    "Start":commands.start,
+                    "Stop":commands.stop,
+                    "Console":commands.connect,
+                    "Launch Options":commands.tui_launch_options,
+                    "Server Options":commands.tui_server_options,
+                    "Install":commands.install,
+                    "Eula":commands.set_eula
+                    }
+        selector = curses_helpers.select_v(list(menu_items))
+        selected = curses.wrapper(selector.display)
+        if selected == None:
+            break
+        menu_items[selected](printer=commands.blank)  
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

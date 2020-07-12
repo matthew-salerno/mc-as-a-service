@@ -14,11 +14,12 @@
         <method name='reload_properties'>
             <arg type='b' name='success' direction='out'/>
         </method>
-        <method name='send'>
-            <arg type='s' name='command' direction='in'/>
+        <method name='install'>
+            <arg type='s' name='version' direction='in'/>
             <arg type='b' name='success' direction='out'/>
         </method>
-        <method name='set_eula'>
+        <method name='send'>
+            <arg type='s' name='command' direction='in'/>
             <arg type='b' name='success' direction='out'/>
         </method>
         <method name='stop_service'/>
@@ -31,10 +32,13 @@
         <property name='server_properties' type='a{ss}' access='readwrite'>
             <annotation name='org.freedesktop.DBus.Property.EmitsChangedSignal' value='true'/>
         </property>
+        <property name='server_default_properties' type='a{ss}' access='read'>
+            <annotation name='org.freedesktop.DBus.Property.EmitsChangedSignal' value='true'/>
+        </property>
         <property name='ramdisk' type='b' access='readwrite'>
             <annotation name='org.freedesktop.DBus.Property.EmitsChangedSignal' value='true'/>
         </property>
-        <property name='eula' type='b' access='read'>
+        <property name='eula' type='b' access='readwrite'>
             <annotation name='org.freedesktop.DBus.Property.EmitsChangedSignal' value='true'/>
         </property>
         <property name='mc_version' type='b' access='read'>
