@@ -9,19 +9,33 @@ confinement: strict
 architectures:
   - build-on: [amd64, arm64]
     run-on: all
+
+slots:
+  dbus-slot:
+    interface: dbus
+    bus: system
+    name: com.salernosection.mc_as_a_service
+
+plugs:
+  dbus-plug:
+    bus: system
+    interface: dbus
+    name: com.salernosection.mc_as_a_service
+        
 apps:
   mc-manager:
-    command: python3 mc_manager
+    command: bin/python3 $SNAP/mc_manager
     plugs:
-      - dbus
+      - dbus-plug
+        
   mc-service:
     daemon: simple
-    command: mc_service
-    stop-command: python3 mc_manager stop-service
+    command: bin/python3 $SNAP/mc_service
+    stop-command: bin/python3 $SNAP/mc_manager stop-service
     plugs:
       - network
       - network-bind
-      - dbus
+    slots: [ dbus-slot ]
 
 parts:
   dependencies:
@@ -37,4 +51,5 @@ parts:
     source: https://github.com/matthew-salerno/mc-as-a-service.git
     source-type: git
     plugin: dump
- 
+
+    
