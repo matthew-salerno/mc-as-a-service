@@ -1,8 +1,9 @@
 from os import environ
 from pathlib import Path
-
+import sys
 
 if "SNAP" in environ:
+    sys.path.append(environ["SNAP"]+"/usr/bin/")
     from pydbus import SystemBus as UsedBus
 else:
     from pydbus import SessionBus as UsedBus
