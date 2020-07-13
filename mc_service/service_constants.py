@@ -1,6 +1,9 @@
 from os import environ
 from pathlib import Path
-
+if "SNAP" in environ:
+    from pydbus import SystemBus as UsedBus
+else:
+    from pydbus import SessionBus as UsedBus
 class constants():
     @property
     def INTERFACE(self):
@@ -44,19 +47,30 @@ class constants():
         return self.ROOT_PATH/"config.json"
 
     @property
+    def RESOURCES_DIR(self):
+        if "SNAP" in environ:
+            return Path(environ["SNAP"])/"resources"
+        else:
+            return self.ROOT_PATH/"resources"
+
+    @property
     def DEFAULT_CONFIG_PATH(self):
         if "SNAP" in environ:
-            return Path(environ["SNAP"])
+            return self.RESOURCES_DIR/"default_config.json"
         else:
-            return self.ROOT_PATH/"resources"/"default_config.json"
+            return self.RESOURCES_DIR/"default_config.json"
 
     @property
     def PROPERTIES_PATH(self):
         return self.SERVER_DIR_PATH/"server.properties"
 
     @property
+    def LOGS_DIR(self):
+        return self.ROOT_PATH/"logs"
+
+    @property
     def OUTPUT(self):
-        return self.ROOT_PATH/"logs"/"out.log"
+        return self.LOGS_DIR/"out.log"
 
     @property
     def RAMDISK_PATH(self):
@@ -64,8 +78,12 @@ class constants():
 
     @property
     def XML_PATH(self):
-        return self.ROOT_PATH/"resources"/"interface.xml"
+        return self.RESOURCES_DIR/"interface.xml"
 
     @property
     def MANIFEST_URL(self):
         return "https://launchermeta.mojang.com/mc/game/version_manifest.json"
+    
+    @property
+    def BUS(self):
+        return UsedBus()

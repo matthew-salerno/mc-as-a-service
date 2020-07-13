@@ -1,5 +1,9 @@
 from os import environ
 from pathlib import Path
+if "SNAP" in environ:
+    from pydbus import SystemBus as UsedBus
+else:
+    from pydbus import SessionBus as UsedBus
 
 class constants():
     @property
@@ -34,3 +38,7 @@ class constants():
     @property
     def EULA_URL(self):
         return "https://account.mojang.com/documents/minecraft_eula"
+
+    @property
+    def BUS(self):
+        return UsedBus()
