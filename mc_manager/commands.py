@@ -4,7 +4,9 @@ import curses
 import subprocess
 from copy import deepcopy
 const = app_constants.constants()
-from pgi.repository import GLib
+import pgi
+pgi.install_as_gi()
+from gi.repository import GLib
 try:
     manager = const.BUS.get(const.INTERFACE)
 except GLib.Error:
