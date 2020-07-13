@@ -9,8 +9,6 @@ import pkg_resources
 import shutil
 from pathlib import Path
 from dirsync import sync
-import pgi
-pgi.install_as_gi()
 from gi.repository import GLib
 
 const = service_constants.constants()

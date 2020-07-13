@@ -41,10 +41,11 @@ parts:
   dependencies:
     plugin: python
     override-stage: |
-      pip3 install wheel; pip3 install pydbus dirsync; pip3 install pgi
+      pip3 install wheel; pip3 install pydbus dirsync vext; pip3 install vext.gi
       snapcraftctl stage
     source: .
     build-packages:
+      - python-gi
       - openjdk-8-jre-headless
 
   mc-server:

@@ -1,5 +1,7 @@
 from os import environ
 from pathlib import Path
+
+
 if "SNAP" in environ:
     from pydbus import SystemBus as UsedBus
 else:
