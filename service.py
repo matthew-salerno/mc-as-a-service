@@ -2,13 +2,14 @@ from helpers import shared, installer
 import re
 import json
 import subprocess
-from os import environ, chdir
+from os import environ, chdir, mkdir
 from time import sleep, gmtime, strftime
 from pydbus import SessionBus as UsedBus  # TODO: replace with system
 from gi.repository import GLib
 from pydbus.generic import signal
 import pkg_resources
 import shutil
+from dirsync import sync
 
 const = shared.constants()
 bus = UsedBus()
@@ -25,12 +26,14 @@ class manager(object):
     def __init__(self, loop):
         super().__init__()
         self._loop = loop
+        self._ramdisk_graceful_exit = True
         self._server_process = server()
         self._server_state = False
         # to querry the status of
         self.load_config()
         self.sync_properties()
         self.save_properties()
+        #setup world path
         self._world_path = const.SERVER_DIR_PATH
         if "level-name" in self._config_data["server"]["properties"]:
             self._world_path /= (self._config_data["server"]["properties"]
@@ -42,6 +45,7 @@ class manager(object):
         else:
             print("No level-name found!")
             self._world_path /= "world"
+
         self._ramdisk = ramdisk(self._server_process, self._world_path)
 
     # __del__ does not work for some reason
@@ -55,7 +59,8 @@ class manager(object):
 
     def load_config(self):
         config_path = const.CONFIG_PATH
-        if not config_path.is_file:
+        if not config_path.is_file():
+            print("No config found, loading defaults")
             default_config_path = const.DEFAULT_CONFIG_PATH
             if default_config_path.exists():
                 shutil.copy(default_config_path,config_path)
@@ -145,7 +150,7 @@ class manager(object):
                 else:
                     raise KeyError(f"{key} not found in either properties")
             properties.close()
-            if self.status:
+            if self.status():
                 self.reload_properties()
 
     @property
@@ -324,16 +329,35 @@ class manager(object):
         Returns:
             bool: true if the server started successfully, false otherwise
         """
+        # check if already running
+        if self.status():
+            return False        
+        # check the ramdisk stopped properly
+        if self._world_path.name == const.RAMDISK_PATH.name:
+            print("UNGRACEFULL EXIT OCCURED LAST RUN, PLEASE CHECK THE WORLD FILES TO")
+            self._world_path = const.SERVER_DIR_PATH / self._config_data["last_world_path"]
+            raise IOError("UNGRACEFULL EXIT OCCURED LAST RUN, FILES MAY STILL BE IN RAMDISK\nPLEASE SYNC THE WORLD AND RAMDISK FOLDERS THEN RUN AGAIN")
+        else:
+            self._config_data["last_world_path"] = self._world_path.name
+        # check the eula
         if not self.eula:
             print("You must agree to the eula to launch the server")
             return False
+        # check if ramdisk is being used
+        if self.ramdisk:
+            props = self.server_properties
+            props["level-name"] = const.RAMDISK_PATH.name
+            self.server_properties = props
+            self._ramdisk_graceful_exit = False
+            self._ramdisk.load()
+        # start the server
         started = self._server_process.start(self.launch_options,
                                              self.launch_path, timeout)
+        # if the server started successfully
         if started:
             if self.ramdisk:
                 GLib.timeout_add_seconds(interval=self.ramdisk_interval*60,
                                          function=self.ramdisk_save)
-                self._ramdisk.load()
             return True
         else:
             return False
@@ -354,8 +378,15 @@ class manager(object):
         Returns:
             bool: true if the server stopped properly, false otherwise
         """
+        if not self.status():
+            return False
         if self.ramdisk:
-            self._ramdisk.save()
+            if not self._ramdisk_graceful_exit:
+                self._ramdisk.save()
+                self._ramdisk_graceful_exit = True
+            props = self.server_properties
+            props["level-name"] = self._world_path.name
+            self.server_properties = props
         return self._server_process.stop(timeout)
 
     def status(self):
@@ -383,7 +414,10 @@ class manager(object):
         Returns:
             bool: True if command was sent
         """
-        return self._server_process.send("reload")
+        if self.status():
+            return self._server_process.send("reload")
+        else:
+            return False
 
     def check_server_state_change(self):
         """checks to see if the server state has changed
@@ -403,6 +437,12 @@ class manager(object):
         Args:
             newstate (bool): the new state of the server
         """
+        if (
+            (newstate==False) and
+            (not self._ramdisk_graceful_exit)
+           ):
+            self._ramdisk.save()
+            self._ramdisk_graceful_exit = True
         self.server_changed(newstate)
         self._server_state = newstate
 
@@ -454,6 +494,7 @@ class server():
                 return False
         try:
             self._server.stdin.close()
+            self._server = None
         except AttributeError:
             return False
         return True
@@ -471,20 +512,26 @@ class server():
         arguments = options.copy()
         for i in range(len(arguments)):
             arguments[i] = f"-{arguments[i]}"
-        print(f"running \"java -jar {str(arguments)} {path}\"\n" +
-              f"from {const.SERVER_DIR_PATH}")
+        print(f"running \"java -jar {str(' '.join(arguments))} {path}\"\nfrom {str(const.SERVER_DIR_PATH)}")
         self._server = subprocess.Popen(["java", "-jar"] + arguments + [path] +
                                         ["nogui"],
                                         shell=False, stdin=subprocess.PIPE,
                                         stdout=out, bufsize=0, env=self._env,
                                         cwd=const.SERVER_DIR_PATH)
+
+        if self.wait_for(r"\[Server thread/INFO\]: Done"):
+                print("Server started!")
+                return True
+        else:
+            return False
+
+    def wait_for(self, message, timeout=30):
         attempt_interval = 0.1
         timer = 0
         log = const.OUTPUT.open('r')
         while True:
             line = log.readline()
-            if re.search(r"\[Server thread/INFO\]: Done", line):
-                print("Server started!")
+            if re.search(message, line):
                 return True
             elif timer >= timeout and timeout > 0:
                 raise TimeoutError
@@ -493,7 +540,7 @@ class server():
                 sleep(attempt_interval)
 
     def send(self, command):
-        if self._server is None:
+        if self._server is None or not self.status():
             return False
         self._server.stdin.write(command.encode()+b"\n")
         print(f"sent command: \"{command}\"")
@@ -507,21 +554,18 @@ class ramdisk():
 
     def save(self):
         self._server.send("say server is backing up ramdisk...")
-        self._server.send("save-all")
-        sleep(0.1)
+        if self._server.send("save-all"):
+            self._server.wait_for(r"Saved the game", 120)
         self._server.send("save-off")
-        subprocess.run(["rsync", "-rlptT", str(const.RAMDISK_TEMP_PATH / "*"),
-                        "--del", str(const.RAMDISK_PATH/self._world_path)])
-        sleep(1)
+        sync(const.RAMDISK_PATH, self._world_path, 'sync', create=True, purge=True, verbose=True)
         self._server.send("save-on")
-        sleep(0.1)
         self._server.send("say server is done backing up ramdisk")
 
     def load(self):
-        subprocess.run(["/bin/rm", "-rf", str(const.RAMDISK_PATH/"*")])
-        subprocess.run(["rsync", "-rlptT", str(const.RAMDISK_TEMP_PATH/"*"),
-                        "--del", str(self._world_path/"*"), str(const.RAMDISK_PATH)])
-
+        
+        if not const.RAMDISK_PATH.is_dir():
+            mkdir(const.RAMDISK_PATH)
+        sync(self._world_path, const.RAMDISK_PATH, 'sync', create=True, purge=True, verbose=True)
 
 if __name__ == "__main__":
     service_manager = manager(loop)

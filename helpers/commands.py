@@ -201,7 +201,10 @@ def status(args=[], printer=print):
         printer("Server is off")
         return False
 
-
+def stop_service(args=[],printer=print):
+    printer("stopping service")
+    manager.stop_service()
+    printer("service stopped")
 
 def install(args=[], printer=print):
     """[summary]

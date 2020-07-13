@@ -23,5 +23,6 @@
     {
         "enabled":false,
         "interval":15
-    }
+    },
+    "last_world_path":""
 }

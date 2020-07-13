@@ -50,7 +50,8 @@ def args_processor(args, quiet=False):
                 "status": commands.status,
                 "install": commands.install,
                 "launch-options": commands.launch_options,
-                "connect": commands.connect
+                "connect": commands.connect,
+                "stop-service": commands.stop_service
                 }
     if len(args):
         if args[0] in args_dict:
