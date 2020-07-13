@@ -1,3 +1,6 @@
 workspace.code-workspace
 mc_service/server/*
 mc_service/config.json
+.vscode/*
+__pycache__
+apps/__pycache__
