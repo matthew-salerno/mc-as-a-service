@@ -4,14 +4,15 @@ import json
 import subprocess
 from os import environ, chdir
 from time import sleep, gmtime, strftime
-from gi.repository import GLib
 from pydbus.generic import signal
 import pkg_resources
 import shutil
 from pathlib import Path
 from dirsync import sync
+from pgi.repository import GLib
 
 const = service_constants.constants()
+
 bus = const.BUS
 loop = GLib.MainLoop()
 chdir(const.ROOT_PATH)

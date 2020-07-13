@@ -7,26 +7,33 @@ else:
 
 class constants():
     @property
+    def SNAP(self):
+        if "SNAP" in environ:
+            return True
+        else:
+            return False
+
+    @property
     def INTERFACE(self):
         return "com.salernosection.mc_as_a_service.manager"
 
     @property
     def VERSION(self):
-        if "SNAP" in environ:
+        if self.SNAP:
             return environ["SNAP_VERSION"]
         else:
             return "unknown"
 
     @property
     def NAME(self):
-        if "SNAP" in environ:
+        if self.SNAP:
             return environ["SNAP_NAME"]
         else:
             return "app.py"
 
     @property
     def HELP_PATH(self):
-        if "SNAP" in environ:
+        if self.SNAP:
             return Path(environ["SNAP"])/"help.txt"
         else:
             return Path(__file__,'..')/"help.txt"

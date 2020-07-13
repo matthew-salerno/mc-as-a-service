@@ -6,26 +6,33 @@ else:
     from pydbus import SessionBus as UsedBus
 class constants():
     @property
+    def SNAP(self):
+        if "SNAP" in environ:
+            return True
+        else:
+            return False
+
+    @property
     def INTERFACE(self):
         return "com.salernosection.mc_as_a_service.manager"
 
     @property
     def VERSION(self):
-        if "SNAP" in environ:
+        if self.SNAP:
             return environ["SNAP_VERSION"]
         else:
             return "unknown"
 
     @property
     def NAME(self):
-        if "SNAP" in environ:
+        if self.SNAP:
             return environ["SNAP_NAME"]
         else:
             return "mc_service"
 
     @property
     def ROOT_PATH(self):
-        if "SNAP" in environ:
+        if self.SNAP:
             return Path(environ["SNAP_COMMON"])
         else:
             return Path(__file__,'..').resolve()
@@ -48,14 +55,14 @@ class constants():
 
     @property
     def RESOURCES_DIR(self):
-        if "SNAP" in environ:
+        if self.SNAP:
             return Path(environ["SNAP"])/"resources"
         else:
             return self.ROOT_PATH/"resources"
 
     @property
     def DEFAULT_CONFIG_PATH(self):
-        if "SNAP" in environ:
+        if self.SNAP:
             return self.RESOURCES_DIR/"default_config.json"
         else:
             return self.RESOURCES_DIR/"default_config.json"

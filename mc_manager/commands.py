@@ -1,15 +1,15 @@
 import app_constants, eula, version_selector, curses_helpers
 import curses
-from gi.repository import GLib
+
 import subprocess
 from copy import deepcopy
 const = app_constants.constants()
+from pgi.repository import GLib
 try:
     manager = const.BUS.get(const.INTERFACE)
 except GLib.Error:
     print("error connecting to service")
     exit(1)
-
 def str2bool(string):
     if isinstance(string,str):
         if string.lower() in ["true", "on", "yes","1", "t"]:

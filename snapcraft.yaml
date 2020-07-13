@@ -39,13 +39,21 @@ apps:
 
 parts:
   dependencies:
-    source: https://github.com/matthew-salerno/mc-as-a-service.git
-    source-type: git
     plugin: python
-    stage-packages:
+    override-stage: |
+      pip3 install wheel; pip3 install pydbus dirsync vext; pip3 install vext.gi
+      snapcraftctl stage
+    source: .
+    build-packages:
+      - gcc
+      - libpq-dev
+      - python-dev
+      - python3-gi
+      - python3-wheel
+      - python3-dev
+      - python3-pip
+      - python3-venv
       - openjdk-8-jre-headless
-    requirements:
-      - requirements.txt
 
   mc-server:
     source: https://github.com/matthew-salerno/mc-as-a-service.git
