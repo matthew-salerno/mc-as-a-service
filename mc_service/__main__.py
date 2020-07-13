@@ -9,6 +9,7 @@ from gi.repository import GLib
 from pydbus.generic import signal
 import pkg_resources
 import shutil
+from pathlib import Path
 from dirsync import sync
 
 const = service_constants.constants()
@@ -19,7 +20,7 @@ class manager(object):
     """Manages the various functions of a minecraft server, such as starting,
     stopping and configuring"""
     
-    dbus = (pkg_resources.resource_string(__name__,const.XML_PATH.name).decode("utf-8"))
+    dbus = (pkg_resources.resource_string(__name__,str(const.XML_PATH.relative_to(Path.cwd()))).decode("utf-8"))
     PropertiesChanged = signal()  # emit when a property changes
     server_changed = signal()  # emit when the server starts/stops
 

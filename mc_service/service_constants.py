@@ -48,7 +48,7 @@ class constants():
         if "SNAP" in environ:
             return Path(environ["SNAP"])
         else:
-            return self.ROOT_PATH/"default_config.json"
+            return self.ROOT_PATH/"resources"/"default_config.json"
 
     @property
     def PROPERTIES_PATH(self):
@@ -56,7 +56,7 @@ class constants():
 
     @property
     def OUTPUT(self):
-        return self.ROOT_PATH/"out.log"
+        return self.ROOT_PATH/"logs"/"out.log"
 
     @property
     def RAMDISK_PATH(self):
@@ -64,7 +64,7 @@ class constants():
 
     @property
     def XML_PATH(self):
-        return self.ROOT_PATH/"interface.xml"
+        return self.ROOT_PATH/"resources"/"interface.xml"
 
     @property
     def MANIFEST_URL(self):
