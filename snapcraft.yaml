@@ -10,54 +10,31 @@ architectures:
   - build-on: [amd64, arm64]
     run-on: all
 apps:
-  mc-run:
-    command: bin/start.sh
+  mc-manager:
+    command: python3 mc_manager
     plugs:
-      - network
-      - network-bind
-      - home
+      - dbus
   mc-service:
     daemon: simple
-    command: bin/start.sh
-    stop-command: bin/stop.sh
+    command: mc_service
+    stop-command: python3 mc_manager stop-service
     plugs:
       - network
       - network-bind
-      - home
-  mc-view:
-    command: bin/view.sh
-    plugs:
-      - home
-  mc-configure:
-    command: bin/configure.sh
-    plugs:
-      - home
-  mc-enable:
-    command: bin/enable.sh
-
-  mc-disable:
-    command: bin/disable.sh
-  mc-install:
-    command: bin/install.sh
-    plugs:
-      - home
+      - dbus
 
 parts:
   dependencies:
-    plugin: nil
+    source: https://github.com/matthew-salerno/mc-as-a-service.git
+    source-type: git
+    plugin: python
     stage-packages:
       - openjdk-8-jre-headless
-      - jq
-      - nano
-      - sed
-      - whiptail
-      - curl
-      - lynx
+    requirements:
+      - requirements.txt
+
   mc-server:
     source: https://github.com/matthew-salerno/mc-as-a-service.git
     source-type: git
     plugin: dump
-    organize:
-        '*.json': etc/
-        '*.sh': bin/
  

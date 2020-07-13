@@ -2,9 +2,8 @@ import service_constants, installer
 import re
 import json
 import subprocess
-from os import environ, chdir, mkdir
+from os import environ, chdir
 from time import sleep, gmtime, strftime
-from pydbus import SessionBus as UsedBus  # TODO: replace with system
 from gi.repository import GLib
 from pydbus.generic import signal
 import pkg_resources
@@ -13,7 +12,7 @@ from pathlib import Path
 from dirsync import sync
 
 const = service_constants.constants()
-bus = UsedBus()
+bus = const.BUS
 loop = GLib.MainLoop()
 chdir(const.ROOT_PATH)
 class manager(object):
@@ -330,6 +329,11 @@ class manager(object):
         Returns:
             bool: true if the server started successfully, false otherwise
         """
+        # check that server file exists
+        if not (const.SERVER_JAR_PATH.is_file() and
+          (const.SERVER_DIR_PATH/self.launch_path).is_file()):
+            print("SERVER MUST BE INSTALLED")
+            return False
         # check if already running
         if self.status():
             return False        
@@ -554,21 +558,26 @@ class ramdisk():
         self._world_path = path
 
     def save(self):
-        self._server.send("say server is backing up ramdisk...")
-        if self._server.send("save-all"):
+        if self._server.status():
+            self._server.send("say server is backing up ramdisk...")
+            self._server.send("save-all")
             self._server.wait_for(r"Saved the game", 120)
-        self._server.send("save-off")
+            self._server.send("save-off")
         sync(const.RAMDISK_PATH, self._world_path, 'sync', create=True, purge=True, verbose=True)
-        self._server.send("save-on")
-        self._server.send("say server is done backing up ramdisk")
+        if self._server.status():
+            self._server.send("save-on")
+            self._server.send("say server is done backing up ramdisk")
 
     def load(self):
-        
-        if not const.RAMDISK_PATH.is_dir():
-            mkdir(const.RAMDISK_PATH)
         sync(self._world_path, const.RAMDISK_PATH, 'sync', create=True, purge=True, verbose=True)
 
-if __name__ == "__main__":
+def start_service():
+    if not (const.SERVER_DIR_PATH).is_dir():
+        const.SERVER_DIR_PATH.mkdir()
+    if not const.RAMDISK_PATH.is_dir():
+        const.RAMDISK_PATH.mkdir()
+    if not const.LOGS_DIR.is_dir():
+        const.LOGS_DIR.mkdir()
     service_manager = manager(loop)
     publish = bus.publish(const.INTERFACE, service_manager)
     GLib.timeout_add_seconds(interval=1,
@@ -581,3 +590,7 @@ if __name__ == "__main__":
         service_manager.stop_service()
         publish.unpublish()
         print("Exit by Control C")
+
+if __name__ == "__main__":
+    start_service()
+    

@@ -3,13 +3,9 @@ import curses
 from gi.repository import GLib
 import subprocess
 from copy import deepcopy
-from pydbus import SessionBus as UsedBus  # TODO: replace with system
-
-interface_name = "com.salernosection.mc_as_a_service.manager"
-bus = UsedBus()
 const = app_constants.constants()
 try:
-    manager = bus.get(const.INTERFACE)
+    manager = const.BUS.get(const.INTERFACE)
 except GLib.Error:
     print("error connecting to service")
     exit(1)
