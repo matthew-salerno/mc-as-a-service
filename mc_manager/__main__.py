@@ -6,7 +6,6 @@ import sys
 
 const = app_constants.constants()
 
-
 def main(arguments):
     try:
         opts, args = getopt(arguments, "hvq", ["mc-version", "help", "quiet",
@@ -64,7 +63,9 @@ def args_processor(args, quiet=False):
 
 
 def cmd_help(args):
-    helpstring = pkg_resources.resource_string(__name__, const.HELP_PATH.name).decode("utf-8")
+    with const.HELP_PATH.open() as help_file:
+        helpstring = help_file.read()
+        help_file.close()
     print(f"{const.NAME}: Version {const.VERSION}")
     print(helpstring)
 

@@ -2,11 +2,6 @@ from os import environ
 from pathlib import Path
 import sys
 
-if "SNAP" in environ:
-    sys.path.append(environ["SNAP"]+"/usr/bin/")
-    from pydbus import SystemBus as UsedBus
-else:
-    from pydbus import SessionBus as UsedBus
 class constants():
     @property
     def SNAP(self):
@@ -38,7 +33,7 @@ class constants():
         if self.SNAP:
             return Path(environ["SNAP_COMMON"])
         else:
-            return Path(__file__,'..').resolve()
+            return Path(__file__,'..','..').resolve()
 
     @property
     def SERVER_DIR_PATH(self):
@@ -61,7 +56,7 @@ class constants():
         if self.SNAP:
             return Path(environ["SNAP"])/"mc_service"/"resources"
         else:
-            return self.ROOT_PATH/"resources"
+            return self.ROOT_PATH/"mc_service"/"resources"
 
     @property
     def DEFAULT_CONFIG_PATH(self):
@@ -93,7 +88,3 @@ class constants():
     @property
     def MANIFEST_URL(self):
         return "https://launchermeta.mojang.com/mc/game/version_manifest.json"
-    
-    @property
-    def BUS(self):
-        return UsedBus()

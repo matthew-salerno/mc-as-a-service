@@ -3,10 +3,16 @@ import curses
 
 import subprocess
 from copy import deepcopy
-const = app_constants.constants()
 from gi.repository import GLib
+const = app_constants.constants()
+
+if const.SNAP:
+    from pydbus import SystemBus as UsedBus
+else:
+    from pydbus import SessionBus as UsedBus
+bus = UsedBus()
 try:
-    manager = const.BUS.get(const.INTERFACE)
+    manager = bus.get(const.INTERFACE)
 except GLib.Error:
     print("error connecting to service")
     exit(1)

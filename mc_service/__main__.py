@@ -5,7 +5,6 @@ import subprocess
 from os import environ, chdir
 from time import sleep, gmtime, strftime
 from pydbus.generic import signal
-import pkg_resources
 import shutil
 from pathlib import Path
 from dirsync import sync
@@ -13,14 +12,21 @@ from gi.repository import GLib
 
 const = service_constants.constants()
 
-bus = const.BUS
+
+if const.SNAP:
+    from pydbus import SystemBus as UsedBus
+else:
+    from pydbus import SessionBus as UsedBus
+
+bus = UsedBus()
 loop = GLib.MainLoop()
 chdir(const.ROOT_PATH)
 class manager(object):
     """Manages the various functions of a minecraft server, such as starting,
     stopping and configuring"""
-    
-    dbus = (pkg_resources.resource_string(__name__,str(const.XML_PATH.relative_to(Path.cwd()))).decode("utf-8"))
+    with const.XML_PATH.open() as xml:
+        dbus = xml.read()
+        xml.close()
     PropertiesChanged = signal()  # emit when a property changes
     server_changed = signal()  # emit when the server starts/stops
 

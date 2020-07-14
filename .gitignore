@@ -1,5 +1,5 @@
 workspace.code-workspace
-mc_service/server
+server
 mc_service/config.json
 .vscode
 __pycache__

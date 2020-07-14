@@ -2,12 +2,6 @@ from os import environ
 from pathlib import Path
 import sys
 
-if "SNAP" in environ:
-    sys.path.append(environ["SNAP"]+"/usr/bin/")
-    from pydbus import SystemBus as UsedBus
-else:
-    from pydbus import SessionBus as UsedBus
-
 class constants():
     @property
     def SNAP(self):
@@ -39,7 +33,7 @@ class constants():
         if self.SNAP:
             return Path(environ["SNAP"])/"help.txt"
         else:
-            return Path(__file__,'..')/"help.txt"
+            return Path(__file__,'..').resolve()/"help.txt"
 
     @property
     def MANIFEST_URL(self):
@@ -48,7 +42,3 @@ class constants():
     @property
     def EULA_URL(self):
         return "https://account.mojang.com/documents/minecraft_eula"
-
-    @property
-    def BUS(self):
-        return UsedBus()
