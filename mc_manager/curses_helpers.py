@@ -3,6 +3,8 @@ from curses.textpad import Textbox, rectangle
 
 
 class item_base():
+    """The base class for menu items
+    """
     def __init__(self):
         pass
     
@@ -16,6 +18,8 @@ class item_base():
 
 
 class item_title(item_base):
+    """class for a centered menu item
+    """
     def __init__(self, title, on_change=None):
         self.title = title
         self.max_len = 0
@@ -39,6 +43,8 @@ class item_title(item_base):
 
 
 class item_editor(item_base):
+    """class for a menu item with a key and editable value
+    """
     def __init__(self, key, value, on_change=None, max_val_len=20):
         self.key=key
         self.value=value
@@ -134,6 +140,8 @@ class item_editor(item_base):
                 return value
 
 class list_base():
+    """base class for lists of items
+    """
     def __init__(self, items):
         self.items = items
         self.selected = 0
@@ -210,6 +218,8 @@ class list_base():
             self.selected += 1 
 
 class list_editor(list_base):
+    """class for a list of item_editor items
+    """
     def __init__(self, items):
         super().__init__(items)
         self.keylength = (
@@ -259,7 +269,7 @@ class list_editor(list_base):
         return True
 
 
-
+# TODO: Replace with new list_h function using items
 class select_h():
     def __init__(self, items, title=""):
         self.items = items
@@ -300,6 +310,7 @@ class select_h():
             elif key == 27:  # escape
                 return None
 
+# TODO: Replace with new list_menu function using items
 class select_v():
     def __init__(self, items, title=""):
         self.items = items
@@ -340,6 +351,7 @@ class select_v():
             elif key == 27:  # escape
                 return None
 
+# TODO: Replace with new list_menu function using items
 class select_v_scrolling():
     def __init__(self, items, title=""):
         self.items = items

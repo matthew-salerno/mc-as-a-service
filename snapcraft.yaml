@@ -7,8 +7,8 @@ type: app
 grade: devel
 confinement: strict
 architectures:
-  - build-on: [amd64, arm64]
-    run-on: all
+  - build-on: [amd64]
+    run-on: amd64
 
 slots:
   dbus-slot:
@@ -18,8 +18,8 @@ slots:
 
 plugs:
   dbus-plug:
-    bus: system
     interface: dbus
+    bus: system
     name: com.salernosection.mc_as_a_service
         
 apps:
@@ -49,6 +49,9 @@ parts:
       pip3 install wheel; pip3 install dirsync; pip3 install --no-deps PyGObject
     source: .
     build-packages:
+      - ca-certificates
+      - ca-certificates-java
+      - openjdk-8-jre-headless
       - libgirepository1.0-dev
       - gcc
       - pkg-config
