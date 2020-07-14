@@ -59,7 +59,7 @@ class constants():
     @property
     def RESOURCES_DIR(self):
         if self.SNAP:
-            return Path(environ["SNAP"])/"resources"
+            return Path(environ["SNAP"])/"mc_service"/"resources"
         else:
             return self.ROOT_PATH/"resources"
 

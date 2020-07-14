@@ -32,7 +32,7 @@ class constants():
         if self.SNAP:
             return environ["SNAP_NAME"]
         else:
-            return "app.py"
+            return "mc_manager"
 
     @property
     def HELP_PATH(self):
