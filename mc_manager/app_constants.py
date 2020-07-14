@@ -1,6 +1,8 @@
 from os import environ
 from pathlib import Path
 import sys
+import gi
+import pydbus
 
 if "SNAP" in environ:
     sys.path.append(environ["SNAP"]+"/usr/bin/")

@@ -59,7 +59,6 @@ parts:
       - libgirepository1.0-dev
       - libcairo-gobject2
       - libcairo2-dev
-      - libgirepository-1.0-1
       - libfontconfig1
       - libfreetype6
       - libpixman-1-0
