@@ -3,8 +3,7 @@ from getopt import getopt, GetoptError
 import pkg_resources
 import curses
 import sys
-import pgi
-pgi.install_as_gi()
+
 const = app_constants.constants()
 
 
