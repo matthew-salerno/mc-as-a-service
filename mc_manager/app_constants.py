@@ -29,11 +29,15 @@ class constants():
             return "mc_manager"
 
     @property
-    def HELP_PATH(self):
+    def RESOURCES_DIR(self):
         if self.SNAP:
-            return Path(environ["SNAP"])/"help.txt"
+            return Path(environ["SNAP"])/"resources"
         else:
-            return Path(__file__,'..').resolve()/"help.txt"
+            return Path(__file__,'..', '..').resolve()/"resources"
+
+    @property
+    def HELP_PATH(self):
+        return self.RESOURCES_DIR/"help.txt"
 
     @property
     def MANIFEST_URL(self):
