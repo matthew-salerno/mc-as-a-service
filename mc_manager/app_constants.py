@@ -1,7 +1,8 @@
 from os import environ
 from pathlib import Path
 import sys
-import gi
+import pgi
+pgi.install_as_gi()
 import pydbus
 
 if "SNAP" in environ:

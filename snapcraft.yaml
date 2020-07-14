@@ -42,10 +42,9 @@ parts:
     plugin: python
     override-build: |
       snapcraftctl build
-      pip3 install wheel; pip3 install pydbus dirsync; pip3 install pycairo; pip3 install PyGObject
+      pip3 install wheel; pip3 install pydbus dirsync; pip3 install pycairo; pip3 install PyGObject pgi
     source: .
     build-packages:
-      - python3-pip
       - libgirepository1.0-dev
       - gcc
       - libcairo2-dev
