@@ -12,7 +12,6 @@ from gi.repository import GLib
 
 const = service_constants.constants()
 
-
 if const.SNAP:
     from pydbus import SystemBus as UsedBus
 else:
