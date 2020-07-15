@@ -468,14 +468,14 @@ class manager(object):
 class server():
     def __init__(self):
         self._env = environ.copy()
-        if "SNAP" in self._env:
+        if const.SNAP:
+            # TODO: There might be a better place to put environment changes
             print("noticed snap package, changing environment variables")
-            self._env["JAVA_HOME"] = ("/usr/lib/jvm/java-1.8.0-openjdk-" +
-                                      self._env["SNAP_ARCH"])
-            self._env["PATH"] = (self._env["JAVA_HOME"] +
-                                 "/bin:" +
-                                 self._env["JAVA_HOME"] +
-                                 "/jre/bin:" + self._env["PATH"])
+            self._env["JAVA_HOME"] = str(Path(self._env["SNAP"])/"usr"/"lib"/"jvm"/"java-8-openjdk-"/
+                                      Path(self._env["SNAP_ARCH"]))
+            self._env["PATH"] = (str(Path(self._env["JAVA_HOME"])/"bin") + ":" +
+                                 str(Path(self._env["JAVA_HOME"])/"jre"/"bin") +
+                                 ":" + self._env["PATH"])
         self._server = None
 
     def __del__(self):
