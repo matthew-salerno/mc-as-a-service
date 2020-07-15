@@ -1,5 +1,5 @@
 <node>
-    <interface name='com.salernosection.mc_as_a_service.manager'>
+    <interface name='com.salernosection.mc_as_a_service'>
         <method name='start'>
             <arg type='u' name='timeout' direction='in'/>
             <arg type='b' name='success' direction='out'/>

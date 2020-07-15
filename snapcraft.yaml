@@ -20,7 +20,7 @@ plugs:
   dbus-plug:
     interface: dbus
     bus: system
-    name: com.giuthub.mc_as_a_service
+    name: com.salernosection.mc_as_a_service
         
 apps:
   mc-manager:
