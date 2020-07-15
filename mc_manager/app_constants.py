@@ -12,7 +12,7 @@ class constants():
 
     @property
     def INTERFACE(self):
-        return "com.salernosection.mc_as_a_service.manager"
+        return "com.salernosection.mc_as_a_service"
 
     @property
     def VERSION(self):

@@ -5,12 +5,12 @@ summary: Minecraft server run as a service
 description: Runs, configures, and helps manage a minecraft server. Designed with ubuntu core in mind
 type: app
 grade: devel
-confinement: strict
+confinement: devmode
 architectures:
   - build-on: [amd64]
     run-on: amd64
 
-slots:
+slots: 
   dbus-slot:
     interface: dbus
     bus: system
@@ -20,7 +20,7 @@ plugs:
   dbus-plug:
     interface: dbus
     bus: system
-    name: com.salernosection.mc_as_a_service
+    name: com.giuthub.mc_as_a_service
         
 apps:
   mc-manager:
