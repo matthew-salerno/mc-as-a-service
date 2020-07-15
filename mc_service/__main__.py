@@ -467,15 +467,6 @@ class manager(object):
 
 class server():
     def __init__(self):
-        self._env = environ.copy()
-        if const.SNAP:
-            # TODO: There might be a better place to put environment changes
-            print("noticed snap package, changing environment variables")
-            self._env["JAVA_HOME"] = str(Path(self._env["SNAP"])/"usr"/"lib"/"jvm"/"java-8-openjdk-"/
-                                      Path(self._env["SNAP_ARCH"]))
-            self._env["PATH"] = (str(Path(self._env["JAVA_HOME"])/"bin") + ":" +
-                                 str(Path(self._env["JAVA_HOME"])/"jre"/"bin") +
-                                 ":" + self._env["PATH"])
         self._server = None
 
     def __del__(self):
@@ -527,7 +518,7 @@ class server():
         self._server = subprocess.Popen(["java", "-jar"] + arguments + [path] +
                                         ["nogui"],
                                         shell=False, stdin=subprocess.PIPE,
-                                        stdout=out, bufsize=0, env=self._env,
+                                        stdout=out, bufsize=0,
                                         cwd=const.SERVER_DIR_PATH)
 
         if self.wait_for(r"\[Server thread/INFO\]: Done"):
