@@ -1,5 +1,5 @@
 name: mc-as-a-service
-version: 1.0.0a1.dev1
+version: 1.0.0a1.dev2
 base: core20
 summary: Minecraft server run as a service
 description: Runs, configures, and helps manage a minecraft server. Designed with ubuntu core in mind
@@ -7,8 +7,8 @@ type: app
 grade: devel
 confinement: devmode
 architectures:
-  - build-on: [amd64]
-    run-on: amd64
+  - build-on: all
+    run-on: all
 
 slots: 
   dbus-slot:
@@ -28,7 +28,7 @@ apps:
     plugs:
       - dbus-plug
     environment:
-      GI_TYPELIB_PATH: $SNAP/usr/lib/girepository-1.0:$SNAP/usr/lib/x86_64-linux-gnu/girepository-1.0
+      GI_TYPELIB_PATH: $SNAP/usr/lib/girepository-1.0:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/girepository-1.0
         
   mc-service:
     daemon: simple
@@ -39,8 +39,8 @@ apps:
       - network-bind
     slots: [ dbus-slot ]
     environment:
-      GI_TYPELIB_PATH: $SNAP/usr/lib/girepository-1.0:$SNAP/usr/lib/x86_64-linux-gnu/girepository-1.0
-      PATH: $PATH:$SNAP/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/bin/:$SNAP/usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/
+      GI_TYPELIB_PATH: $SNAP/usr/lib/girepository-1.0:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/girepository-1.0
+      PATH: $PATH:$SNAP/usr/lib/jvm/java-1.8.0-openjdk-$SNAP_ARCH/jre/bin/:$SNAP/usr/lib/jvm/java-1.8.0-openjdk-$SNAP_ARCH/bin/
 
 parts:
   dependencies:
