@@ -35,7 +35,11 @@ Should your server stop unexpectadly, the ramdisk may not have backed up to your
   
 first download the snap with:  
 ```sudo snap install mc-as-a-service```  
-  
+
+Or:  
+
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/mc-as-a-service)
+
 A connection must be made between the service and user app:  
 ```sudo snap connect mc-as-a-service:dbus-plug mc-as-a-service:dbus-slot```
   
