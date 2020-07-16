@@ -5,10 +5,10 @@ summary: Minecraft server run as a service
 description: Runs, configures, and helps manage a minecraft server. Designed with ubuntu core in mind
 type: app
 grade: devel
-confinement: devmode
+confinement: strict
 architectures:
-  - build-on: all
-    run-on: all
+  - build-on: [amd64, armhf, arm64]
+    run-on: [amd64, armhf, arm64]
 
 slots: 
   dbus-slot:
@@ -47,8 +47,10 @@ parts:
     plugin: python
     override-build: |
       snapcraftctl build
-      pip3 install wheel; pip3 install dirsync; pip3 install --no-deps PyGObject
-    source: .
+      pip3 install wheel
+      pip3 install dirsync urllib3 pydbus
+      pip3 install pycairo
+      pip3 install PyGObject
     build-packages:
       - ca-certificates
       - ca-certificates-java
@@ -56,6 +58,7 @@ parts:
       - libgirepository1.0-dev
       - gcc
       - pkg-config
+      - libcairo2-dev
       - gir1.2-glib-2.0
       - gir1.2-freedesktop
     stage-packages:
@@ -63,9 +66,7 @@ parts:
       - openjdk-8-jre-headless
       - gir1.2-glib-2.0
       - gir1.2-freedesktop
-    python-packages:
-      - urllib3
-      - pydbus
+
   mc-server:
     source: https://github.com/matthew-salerno/mc-as-a-service.git
     source-type: git
