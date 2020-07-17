@@ -466,6 +466,9 @@ class manager(object):
 
 
 class server():
+    """This class manages , keeps track of, and
+    communicates with the minecraft server process.
+    """
     def __init__(self):
         self._server = None
 
@@ -528,6 +531,18 @@ class server():
             return False
 
     def wait_for(self, message, timeout=30):
+        """Waits for a particular regex to appear in the server logs
+
+        Args:
+            message (str): a regex to look for in the server's output
+            timeout (int, optional): The amount of time to wait before giving up. Defaults to 30.
+
+        Raises:
+            TimeoutError: If timeout is reached
+
+        Returns:
+            bool: returns if the message was recieved before timeout
+        """
         attempt_interval = 0.1
         timer = 0
         log = const.OUTPUT.open('r')
@@ -542,6 +557,14 @@ class server():
                 sleep(attempt_interval)
 
     def send(self, command):
+        """sends a command to the server's STDIN
+
+        Args:
+            command (str): the command to send to the minecraft server
+
+        Returns:
+            bool: True if STDIN was written to, false otherwise
+        """
         if self._server is None or not self.status():
             return False
         self._server.stdin.write(command.encode()+b"\n")
@@ -550,11 +573,15 @@ class server():
 
 
 class ramdisk():
+    """This class is responsible for managing the ramdisk
+    """
     def __init__(self, serverobj, path):
         self._server = serverobj
         self._world_path = path
 
     def save(self):
+        """Backs up the contents in the ramdisk folder to the server's world folder
+        """
         if self._server.status():
             self._server.send("say server is backing up ramdisk...")
             self._server.send("save-all")
@@ -566,9 +593,13 @@ class ramdisk():
             self._server.send("say server is done backing up ramdisk")
 
     def load(self):
+        """Loads contents from the server's world folder into the ramdisk
+        """
         sync(self._world_path, const.RAMDISK_PATH, 'sync', create=True, purge=True, verbose=True)
 
 def start_service():
+    """This function starts the mc-as-a-service service
+    """
     if not (const.SERVER_DIR_PATH).is_dir():
         const.SERVER_DIR_PATH.mkdir()
     if not const.RAMDISK_PATH.is_dir():

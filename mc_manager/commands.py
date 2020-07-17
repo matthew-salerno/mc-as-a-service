@@ -17,8 +17,19 @@ except GLib.Error:
     print("error connecting to service")
     exit(1)
 def str2bool(string):
+    """Quick function that converts a string to bool
+
+    Args:
+        string (str): The string to be converted to a bool
+
+    Raises:
+        TypeError: Raises an error if string is not of type bool or str
+
+    Returns:
+        bool: the converted string
+    """
     if isinstance(string,str):
-        if string.lower() in ["true", "on", "yes","1", "t"]:
+        if string.lower() in ["true", "on", "yes", "1", "t"]:
             return True
         elif string.lower() in ["false", "off", "no", "0", "f"]:
             return False
@@ -28,6 +39,12 @@ def str2bool(string):
         raise TypeError
 
 def blank(*args, **kwargs):
+    """Does nothing, takes any arguments
+    Used for specifying a printer function
+    TODO: Replace this with something a little more
+    appropriate, like maybe null object to be used with a
+    print object and a the logger module.
+    """
     pass
 
 def set_eula(args=[], printer=print):
@@ -313,6 +330,8 @@ def connect(args=[], printer=print):
     printer("Not implemented")
 
 def tui_launch_options(**kwargs):
+    """This is the TUI for selecting launch options
+    """
     items = [curses_helpers.item_editor("Launch Path", set_path(printer=blank)),
              curses_helpers.item_editor("Launch Options"," ".join(launch_options(printer=blank))),
              curses_helpers.item_editor("Ramdisk",ramdisk(printer=blank))]
@@ -327,6 +346,8 @@ def tui_launch_options(**kwargs):
             ramdisk(change[1], printer=blank)
 
 def tui_server_options(**kwargs):
+    """This is the TUI for changing server.properties settings
+    """
     options = manager.server_properties
     new_options = deepcopy(options)
     default_options = manager.server_default_properties

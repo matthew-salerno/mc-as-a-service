@@ -5,15 +5,16 @@ from curses.textpad import Textbox, rectangle
 class item_base():
     """The base class for menu items
     """
-    def __init__(self):
-        pass
-    
     def init_curses(self):
+        """A few curses settings shared across all items
+        """
         curses.noecho()
         curses.cbreak()
         curses.curs_set(0)
 
     def display(self, y_pos, key_x, value_x, stdscr, selected, formatting=0):
+        """This is meant to be overloaded by a child
+        """
         pass
 
 
@@ -45,7 +46,15 @@ class item_title(item_base):
 class item_editor(item_base):
     """class for a menu item with a key and editable value
     """
-    def __init__(self, key, value, on_change=None, max_val_len=20):
+    def __init__(self, key, value, max_val_len=20):
+        """This is a display item which has a key and an editable value
+
+        Args:
+            key (str): The key to be displayed
+            value (str,int,float,bool): The value to be edited
+            max_val_len (int, optional): The maximum length of the value field.
+                Defaults to 20.
+        """
         self.key=key
         self.value=value
         self.name = key
@@ -57,6 +66,19 @@ class item_editor(item_base):
             self.validation = self.float_validator
         self.max_val_len = max_val_len
     def display(self, y_pos, key_x, value_x, stdscr, selected, formatting=0):
+        """Displays the item
+
+        Args:
+            y_pos (int): The y position on stdscr for the item to be displayed
+            key_x (int): the x position on stdscr for the key to be displayed
+            value_x (int): the x position on stdscr for the value to be displayed
+            stdscr (_CursesWindow): a curses windows or pad to use
+            selected (bool): Whether or not this item is selected
+            formatting (int, optional): a curses format to use. Defaults to 0.
+
+        Returns:
+            None, value: returns self.value if an edit was made, otherwise None
+        """
         self.init_curses()
         key_window=curses.newwin(1,value_x-key_x,y_pos,key_x)
         value_window=curses.newwin(1,self.max_val_len,y_pos,value_x)
@@ -81,6 +103,15 @@ class item_editor(item_base):
         return (self.key,self.value) if changed else None
     
     def str_validator(self, key):
+        """This function maps a given keystroke to the desired response when
+        the user is editing a value of type str
+
+        Args:
+            key (int): The key pressed
+
+        Returns:
+            int: the key to returns
+        """
         if self.box == None:
             return
         if key == 27:
@@ -93,6 +124,15 @@ class item_editor(item_base):
         else:
             return key
     def float_validator(self, key):
+        """This function maps a given keystroke to the desired response when
+        the user is editing a value of type float
+
+        Args:
+            key (int): The key pressed
+
+        Returns:
+            int: the key to returns
+        """
         if self.box == None:
             return
         if key == 27:
@@ -110,6 +150,15 @@ class item_editor(item_base):
         if key in range(48,58):  # allowed values
             return key
     def int_validator(self, key):
+        """This function maps a given keystroke to the desired response when
+        the user is editing a value of type int
+
+        Args:
+            key (int): The key pressed
+
+        Returns:
+            int: the key to returns
+        """
         if self.box == None:
             return
         if key == 27:
@@ -124,6 +173,16 @@ class item_editor(item_base):
         if key in range(48,58):  # allowed values
             return key
     def bool_validator(self, stdscr, window):  # This one's special and runs without textbox
+        """This function gets a keystroke and toggles self.value, exiting without
+        changing on ESC and exiting with changes on ENTER
+
+        Args:
+            stdscr (_CursesWindow): The parent screen object
+            window (_CursesWindow): The window object text is being written to
+
+        Returns:
+            int: the key to returns
+        """
         value = self.value
         while True:
             key = stdscr.getch()
@@ -149,6 +208,14 @@ class list_base():
         
     
     def display(self, stdscr):
+        """Displays a list of items
+
+        Args:
+            stdscr (_CursesWindow): The window object to display to
+
+        Returns:
+            any: returns whatever the child class sets self.returnVal to
+        """
         self.rows, self.cols = stdscr.getmaxyx()
         self.middle_col = int(self.cols/2)
         self.start = 0
@@ -165,15 +232,42 @@ class list_base():
         return self.returnVal
     
     def pre_loop(self, stdscr):
+        """This is run before the main loop, and is available to be overloaded
+
+        Args:
+            stdscr (_CursesWindow): The window object to display to
+        """
         pass
     
     def loop(self, stdscr):
+        """This is the main loop, and is meant to be overloaded
+
+        Args:
+            stdscr (_CursesWindow): The window object to display to
+
+        Returns:
+            bool: True to continue loop, false otherwise
+        """
         return True
     
     def post_loop(self, stdscr):
+        """This is run after the loop completes and is available to be overloaded
+
+        Args:
+            stdscr (_CursesWindow): The window object to display to
+        """
         pass
     
     def get_key(self, stdscr):
+        """This function handles commonly used keys, 
+        and calls overloadable functions to deal with them
+
+        Args:
+            stdscr (_CursesWindow): The window object to display to
+
+        Returns:
+            bool: True to continue the main loop, False to stop
+        """
         key = stdscr.getch()
         if key == curses.KEY_DOWN:
             self.key_down()
@@ -187,15 +281,35 @@ class list_base():
             return True
     
     def key_enter(self):
+        """This is a function called when enter is pressed
+        it is available to be overloaded
+
+        Returns:
+            bool: True to continue the main loop, False to stop
+        """
         return True
     
     def key_up(self):
+        """This is a function called when the up key is pressed
+        it is available to be overloaded, but calls sel_up() by default
+
+        Returns:
+            bool: True to continue the main loop, False to stop
+        """
         return self.sel_up()
 
     def key_down(self):
+        """This is a function called when the down key is pressed
+        it is available to be overloaded, but calls sel_down() by default
+
+        Returns:
+            bool: True to continue the main loop, False to stop
+        """
         return self.sel_down()
     
     def sel_up(self):
+        """This function is called to move the cursor up
+        """
         if self.selected == self.start:
             if self.start > 0:
                 self.start -= 1
@@ -207,6 +321,8 @@ class list_base():
             self.selected -= 1
 
     def sel_down(self):
+        """This function is called to move the cursor down
+        """
         if self.selected + 1 >= self.rows + self.start or self.selected >= len(self.items) - 1:
             if ((self.start + self.rows < len(self.items)) and (self.selected < len(self.items))):
                 self.start += 1
@@ -221,6 +337,13 @@ class list_editor(list_base):
     """class for a list of item_editor items
     """
     def __init__(self, items):
+        """Calls parent init and also finds the
+        largest sized string in the list of items given
+
+        Args:
+            items (list): a list of items which share the item_base parent
+            to be displayed in the list
+        """
         super().__init__(items)
         self.keylength = (
             max(
@@ -236,10 +359,24 @@ class list_editor(list_base):
         return
     
     def pre_loop(self, stdscr):
+        """Sets up the variable returnVal to be used as a list
+
+        Args:
+            stdscr (_CursesWindow): The window object to display to
+        """
         self.returnVal = []
         return
 
     def loop(self, stdscr):
+        """This is the function called in the loop
+        inside the parent's display() function
+
+        Args:
+            stdscr (_CursesWindow): The window object to display to
+
+        Returns:
+            bool: true to continue the loop, false to stop it
+        """
         for i in range(len(self.items)):
             if i >= self.start and i <= self.start + self.rows:
                 if type(self.items[i]) is item_editor:
@@ -265,6 +402,11 @@ class list_editor(list_base):
 
 
     def key_enter(self):
+        """This is the function called when enter is pressed
+
+        Returns:
+            bool: true to continue the loop
+        """
         self.edit = True
         return True
 

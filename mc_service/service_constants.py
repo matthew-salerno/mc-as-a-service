@@ -3,6 +3,9 @@ from pathlib import Path
 import sys
 
 class constants():
+    """These are all property functions which return values that should not be changed and
+    are used by the mc-service app
+    """
     @property
     def SNAP(self):
         if "SNAP" in environ:

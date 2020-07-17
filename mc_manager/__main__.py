@@ -6,7 +6,13 @@ import sys
 
 const = app_constants.constants()
 
-def main(arguments):
+def process_command(arguments):
+    """Processes the arguments and options issued by the command
+
+    Args:
+        arguments (list): should be a sys.argv[1:] argument vector
+    """
+    
     try:
         opts, args = getopt(arguments, "hvq", ["mc-version", "help", "quiet",
                                                "version"])
@@ -15,29 +21,10 @@ def main(arguments):
     option_dict = {
                 "-h": cmd_help,
                 "-v": version,
-                "-q": quiet,
                 "--mc-version": commands.mc_version,
                 "--help": cmd_help, 
-                "--quiet": quiet,
                 "--version": version
                 }
-    if opts:  # if not empty
-        # for this particular application we don't need a case where
-        # there are multiple options or option values
-        option_dict[opts[0][0]](args)
-    else:
-        args_processor(args)
-
-
-def version(args):
-    print(const.VERSION)
-
-
-def quiet(args):
-    args_processor(args, True)
-
-
-def args_processor(args, quiet=False):
     args_dict = {
                 "start": commands.start,
                 "stop": commands.stop,
@@ -53,16 +40,39 @@ def args_processor(args, quiet=False):
                 "connect": commands.connect,
                 "stop-service": commands.stop_service
                 }
-    if len(args):
-        if args[0] in args_dict:
-            args_dict[args[0]](args[1:], printer=(commands.blank if quiet else print))
-        else:
-            print("No command found!")
+    quiet = False
+    if opts:  # if not empty
+        # for this particular application we don't need a case where
+        # there are multiple options or option values
+        if "--quiet" in (x[0] for x in opts) or "-q" in (x[0] for x in opts):
+            quiet=True
+        option_dict[opts[0][0]](args)
     else:
-        tui()
+        if len(args):
+            if args[0] in args_dict:
+                args_dict[args[0]](args[1:], printer=(commands.blank if quiet else print))
+            else:
+                print("No command found!")
+        else:
+            tui()
 
+
+def version(args):
+    """Returns the version of mc-as-a-service
+
+    Args:
+        args (any): doesn't except arguments,
+        but could be called with arguments
+    """
+    print(const.VERSION)
 
 def cmd_help(args):
+    """Prints the file help.txt to the console
+
+    Args:
+        args (any): doesn't except arguments,
+        but could be called with arguments
+    """
     with const.HELP_PATH.open() as help_file:
         helpstring = help_file.read()
         help_file.close()
@@ -71,6 +81,9 @@ def cmd_help(args):
 
 
 def tui():
+    """This is the top level TUI interface,
+    or main menu
+    """
     while True:
         menu_items = {
                     "Start":commands.start,
@@ -85,7 +98,7 @@ def tui():
         selected = curses.wrapper(selector.display)
         if selected == None:
             break
-        menu_items[selected](printer=commands.blank)  
+        menu_items[selected](printer=commands.blank)
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    process_command(sys.argv[1:])
