@@ -22,64 +22,110 @@ const = app_constants.constants()
 
 class eula():
     def __init__(self):
-        self.strings=[""]
-        self.format = {"h1":False, "h2":False, "ul":False, "strong":False}
+        self.strings=[]
     def addstr(self, string):
-        self.strings.append(string)
-    def printall(self):
-        for string in self.strings:
-            print(string,end='',sep='')
-    
-    def get_string(self, cols):
-        working_string = ''
-        full_string = ''
-        formatted_split = []
-        for string in self.strings:
-            full_string += string
-        strings_split = full_string.split("\n")
-        for string in strings_split:
-            formatted_split.append(textwrap.fill(string, cols, replace_whitespace=False))
-        working_string = '\n'.join(formatted_split)
-        return re.split('<|>',working_string)
-    
-    def curse_all(self, obj, stdscr, pos=0):
-        num_cols = obj.getmaxyx()[1]
-        lines, cols = stdscr.getmaxyx()
+        if self.strings:
+            string = self.strings[-1] + string  # Combine with newest
+            self.strings.pop()  # remove newest
+        for substring in re.split('(<[^>]*>)',string):
+            substring=re.sub('\n','',substring)
+            substring=re.sub(' +',' ',substring)
+            # so long as it's not empty
+            if substring and not re.match('^ *$',substring):
+                self.strings.append(substring)  # add it back in
 
-        for string in self.get_string(num_cols - 1):
-            
-            if string in self.format:
-                self.format[string]=True
-                continue
-            elif string[0]=='/' and len(string) < 10:
-                string = string.lstrip('/')
-                if string in self.format:
-                    self.format[string]=False
-                continue
-            if self.format["h1"] or self.format["h2"]:
-                half_length_of_message = int(len(string) / 2)
-                y_position = obj.getyx()[0]
-                middle_column = int(num_cols / 2)
-                x_position = middle_column - half_length_of_message
-                obj.addstr(y_position, x_position, string, curses.A_BOLD | curses.A_UNDERLINE)
-            elif self.format["ul"] and self.format["strong"]:
-                obj.addstr(string, curses.A_UNDERLINE)
-            elif self.format["ul"]:
-                obj.addstr(string, curses.A_UNDERLINE)
-            elif self.format["strong"]:
-                obj.addstr(string, curses.A_BOLD)
-            else:
-                obj.addstr(string)
-        obj.refresh(0,0,1,1,lines - 2, cols - 1)
-            
-    def get_lines(self):
-        lines=0
-        for string in self.strings:
-            lines += string.count('\n')
-        return lines
-    def get_lines_formatted(self, cols):
-        return ''.join(self.get_string(cols)).count('\n')
+    def curse_all(self, pad, stdscr, pos=0):
+        pad.erase()
+        format_dict = {"<h1>":False, "<h2>":False, "<ul>":False, "<strong>":False, "<sup>":False}
+        pad_cols = pad.getmaxyx()[1]
+        lines, cols = stdscr.getmaxyx()
         
+        for string in self.strings:
+            # Find begin format
+            if string[0] == '<':
+                if string in format_dict:
+                    format_dict[string]=True
+                elif string == "<p>":
+                    pad.addstr("    ")
+                #find end format
+                elif string[1]=='/' and len(string) < 10:
+                    string = re.sub('/','',string)
+                    if string in format_dict:
+                        format_dict[string]=False
+                    elif string == "<p>":
+                        pad.addstr("\n")
+                continue
+            y_position, x_position = pad.getyx()
+            string = textwrap.fill(string, pad_cols-2, initial_indent=' '*x_position, drop_whitespace=False)
+            string = re.sub('\n ', '\n', string)
+            string = string[x_position:]
+            # apply formatting
+            string_format = 0
+            
+            if not format_dict["<sup>"]:
+                if format_dict["<h1>"] or format_dict["<h2>"]:  # Headers
+                    string_format = string_format | curses.A_BOLD | curses.A_UNDERLINE
+                    half_length_of_message = int(len(string) / 2)
+                    middle_column = int(pad_cols / 2)
+                    x_position = middle_column - half_length_of_message
+                    y_position += 1
+                    #pad.addstr("\n")  # This line shouldn't make a difference
+                    string = string+"\n"
+                if format_dict["<ul>"]:  # Underline
+                    string_format = string_format | curses.A_UNDERLINE
+                if format_dict["<strong>"]:  # Bold
+                    string_format = string_format | curses.A_BOLD
+            pad.addstr(y_position, x_position, string, string_format)
+        # Refresh pad at top
+        pad.refresh(pos,0,1,1,lines - 2, cols - 1)
+            
+    def get_lines(self, cols):
+        fakepad = fake_pad(cols)
+        fakescr = fake_pad(cols)
+        self.curse_all(fakepad,fakescr)
+        return fakepad.lines
+
+class fake_pad():
+    """A fake pad object which is used to count new lines printed
+    Slower than it could be but it has the advantage of garrunteeing the right 
+    answer no matter how much things in another function may change
+    """
+    def __init__(self, cols):
+        self.cols = cols
+        self.lines = 0
+
+    def refresh(self, *args, **kwargs):
+        pass
+
+    def addstr(self, *args):
+        if len(args) in [1,2]:
+            y = self.lines
+            # x = x pos
+            string = args[0]
+            # formatting = args[1]
+        elif len(args) in [3,4]:
+            y = args[0]
+            # x = args[1]
+            string = args[2]
+            # formatting = args[3]
+        else:
+            raise ValueError("Wrong number of arguments!")
+        if y > self.lines:
+            self.lines = y
+        self.lines += string.count("\n")
+
+    def getyx(self):
+        return (self.lines,0)
+
+    def getmaxyx(self):
+        return (self.lines,self.cols)
+
+    def erase(self):
+        self.lines = 0
+
+    def clear(self):
+        self.lines = 0
+
 class EULA_HTML_Parser(HTMLParser):
     def __init__(self, print_func=print):
         super().__init__()
@@ -110,8 +156,9 @@ class EULA_HTML_Parser(HTMLParser):
             return
         if tag == self._off_tag:
             self._on = False
+            # Add links to the end
             for i in range(len(self.links)):  # add links at the end
-                self.links[i] = f"[{i+1}]{self.links[i]}\n"
+                self.links[i] = f"[{i+1}]{self.links[i]}</p>"
                 self.display(self.links[i])
             return
         self.tagger(tag, False)
@@ -123,31 +170,25 @@ class EULA_HTML_Parser(HTMLParser):
         if not self._on:
             return
         start_dict={
-            "p":"    ",
-            "li":"* ",
+            "li":"<sup>* </sup>", # sup is my own tag, for suppress, it temporarily turns off tags
             "a":"<ul>",
-            "h1":"\n\n<h1>",
-            "h2":"\n<h2>"
         }
         end_dict={
-            "p":"",
-            "li":"",
-            "a":f"[{len(self.links)}]</ul>"
+            "li":"</p>",
+            "a":f"</ul> [{len(self.links)}]"
         }
         tag_dict=(start_dict if start else end_dict)
         if tag in tag_dict:
             self.display(tag_dict[tag])
         else:
-            self.display("<")
-            self.display("/") if not start else ""
-            self.display(tag)
-            self.display(">")
+            self.display(f"<{'/' if not start else ''}{tag}>")
 
 def eula_check(stdscr):
     lines, cols = stdscr.getmaxyx()
     the_eula=eula()
     parser = EULA_HTML_Parser(the_eula.addstr)
     parser.feed(https.request('GET',const.EULA_URL).data.decode("utf-8"))
+    
     pos = 0
     agree = False
     curses.curs_set(0)
@@ -155,17 +196,19 @@ def eula_check(stdscr):
     curses.noecho()
     curses.cbreak()
     stdscr.keypad(True)
-    eulapad = curses.newpad(the_eula.get_lines_formatted(cols-2)+1,cols-1)
-    the_eula.curse_all(eulapad,stdscr)
+    eulapad = curses.newpad(the_eula.get_lines(cols-2)+10,cols-2)
+    the_eula.curse_all(eulapad, stdscr, pos)
     while True:
+        lines, cols = stdscr.getmaxyx()
         stdscr.addstr(lines - 1,4,"I agree", curses.A_STANDOUT if agree else 0)
         stdscr.addstr(lines - 1, cols - 19,"I do not agree", 0 if agree else curses.A_STANDOUT)
         stdscr.refresh()
         eulapad.refresh(pos,0,1,1,lines - 2, cols - 1)
+        eula_length=eulapad.getmaxyx()[0]
         key = stdscr.getch()
         if key == curses.KEY_UP and pos > 0:
             pos -= 1
-        elif key == curses.KEY_DOWN and pos < eulapad.getmaxyx()[0] - lines + 2:
+        elif key == curses.KEY_DOWN and pos < (eula_length - lines):
             pos += 1
         elif key == curses.KEY_RIGHT:
             agree = False
