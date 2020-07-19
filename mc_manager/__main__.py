@@ -19,12 +19,12 @@ def process_command(arguments):
     except GetoptError:
         print(f"Wrong arguments, type {const.NAME} -h for help")
     option_dict = {
-                "-h": cmd_help,
-                "-v": version,
-                "--mc-version": commands.mc_version,
-                "--help": cmd_help, 
-                "--version": version
-                }
+                  "-h": cmd_help,
+                  "-v": version,
+                  "--mc-version": commands.mc_version,
+                  "--help": cmd_help, 
+                  "--version": version
+                  }
     args_dict = {
                 "start": commands.start,
                 "stop": commands.stop,
