@@ -38,10 +38,10 @@ class eula():
         pad.erase()
         format_dict = {"<h1>":False, "<h2>":False, "<ul>":False, "<strong>":False, "<sup>":False}
         pad_cols = pad.getmaxyx()[1]
-        lines, cols = stdscr.getmaxyx()
-        
+
         for string in self.strings:
             # Find begin format
+            y_position, x_position = pad.getyx()
             if string[0] == '<':
                 if string in format_dict:
                     format_dict[string]=True
@@ -53,78 +53,64 @@ class eula():
                     if string in format_dict:
                         format_dict[string]=False
                     elif string == "<p>":
-                        pad.addstr("\n")
+                        y_position += 1
+                        pad.move(y_position,0)
                 continue
-            y_position, x_position = pad.getyx()
-            string = textwrap.fill(string, pad_cols-2, initial_indent=' '*x_position, drop_whitespace=False)
-            string = re.sub('\n ', '\n', string)
-            string = string[x_position:]
+            
             # apply formatting
             string_format = 0
             
             if not format_dict["<sup>"]:
-                if format_dict["<h1>"] or format_dict["<h2>"]:  # Headers
-                    string_format = string_format | curses.A_BOLD | curses.A_UNDERLINE
-                    half_length_of_message = int(len(string) / 2)
-                    middle_column = int(pad_cols / 2)
-                    x_position = middle_column - half_length_of_message
-                    y_position += 1
-                    #pad.addstr("\n")  # This line shouldn't make a difference
-                    string = string+"\n"
                 if format_dict["<ul>"]:  # Underline
                     string_format = string_format | curses.A_UNDERLINE
                 if format_dict["<strong>"]:  # Bold
                     string_format = string_format | curses.A_BOLD
-            pad.addstr(y_position, x_position, string, string_format)
-        # Refresh pad at top
-        pad.refresh(pos,0,1,1,lines - 2, cols - 1)
+                if format_dict["<h1>"] or format_dict["<h2>"]:  # Headers
+                    string_format = string_format | curses.A_BOLD | curses.A_UNDERLINE
+                    middle_column = int(pad_cols / 2)
+                    string_list = textwrap.wrap(string, pad_cols-2)
+                    string = ""
+                    y_position += 1
+                    for line in string_list:
+                        half_length_of_message = int(len(line) / 2)
+                        x_position = middle_column - half_length_of_message
+                        pad.addstr(y_position, x_position, line, string_format)
+                        y_position += 1
+                        pad.move(y_position,0)
+                        
+                else:
+                    string = textwrap.fill(string, pad_cols-2, initial_indent=' '*x_position, drop_whitespace=False)
+                    string = re.sub('\n ', '\n', string)
+                    string = string[x_position:]
+                    pad.addstr(y_position, x_position, string, string_format)
+                lines, cols = stdscr.getmaxyx()
+                pad.refresh(pos,0,1,1,lines - 2, cols - 2)
             
     def get_lines(self, cols):
-        fakepad = fake_pad(cols)
-        fakescr = fake_pad(cols)
-        self.curse_all(fakepad,fakescr)
-        return fakepad.lines
+        numLines = 0
+        paragraph = ""
 
-class fake_pad():
-    """A fake pad object which is used to count new lines printed
-    Slower than it could be but it has the advantage of garrunteeing the right 
-    answer no matter how much things in another function may change
-    """
-    def __init__(self, cols):
-        self.cols = cols
-        self.lines = 0
+        #Logic:
+        # If end of paragraph, see how much text was seen since previous text and run textwrap to 
+        #  determine how many lines it was
+        # If end of header, same as paragraph but add 1
+        # If this was any other tag, ignore.
+        # If just plain text, add to the paragraph variable to keep track of previous text
 
-    def refresh(self, *args, **kwargs):
-        pass
-
-    def addstr(self, *args):
-        if len(args) in [1,2]:
-            y = self.lines
-            # x = x pos
-            string = args[0]
-            # formatting = args[1]
-        elif len(args) in [3,4]:
-            y = args[0]
-            # x = args[1]
-            string = args[2]
-            # formatting = args[3]
-        else:
-            raise ValueError("Wrong number of arguments!")
-        if y > self.lines:
-            self.lines = y
-        self.lines += string.count("\n")
-
-    def getyx(self):
-        return (self.lines,0)
-
-    def getmaxyx(self):
-        return (self.lines,self.cols)
-
-    def erase(self):
-        self.lines = 0
-
-    def clear(self):
-        self.lines = 0
+        for string in self.strings:
+            if string == "</p>":
+               parsed = textwrap.wrap("    " + paragraph, width=cols)
+               numLines += len(parsed)
+               paragraph = ""
+            elif re.match("^</h[1-8]>$", string):
+               parsed = textwrap.wrap(paragraph, width=cols)
+               numLines += 1 + len(parsed) #+1 for the newline above
+               paragraph = ""
+            elif string[0] == "<":
+               continue
+            else:
+               paragraph += string
+        return numLines
 
 class EULA_HTML_Parser(HTMLParser):
     def __init__(self, print_func=print):
@@ -158,7 +144,7 @@ class EULA_HTML_Parser(HTMLParser):
             self._on = False
             # Add links to the end
             for i in range(len(self.links)):  # add links at the end
-                self.links[i] = f"[{i+1}]{self.links[i]}</p>"
+                self.links[i] = f"<p>[{i+1}]{self.links[i]}</p>"
                 self.display(self.links[i])
             return
         self.tagger(tag, False)
@@ -170,7 +156,7 @@ class EULA_HTML_Parser(HTMLParser):
         if not self._on:
             return
         start_dict={
-            "li":"<sup>* </sup>", # sup is my own tag, for suppress, it temporarily turns off tags
+            "li":"<p><sup>* </sup>", # sup is my own tag, for suppress, it temporarily turns off tags
             "a":"<ul>",
         }
         end_dict={
@@ -183,7 +169,8 @@ class EULA_HTML_Parser(HTMLParser):
         else:
             self.display(f"<{'/' if not start else ''}{tag}>")
 
-def eula_check(stdscr):
+def eula_render(stdscr):
+    max_size = (5,25) # Mostly Arbitrarily chosen
     lines, cols = stdscr.getmaxyx()
     the_eula=eula()
     parser = EULA_HTML_Parser(the_eula.addstr)
@@ -196,19 +183,43 @@ def eula_check(stdscr):
     curses.noecho()
     curses.cbreak()
     stdscr.keypad(True)
-    eulapad = curses.newpad(the_eula.get_lines(cols-2)+10,cols-2)
+    
+    #Pad will put 1 space on the left and right. As you use an additional 2 spaces of padding on the right,
+    #You get that the total spacing is 4. Hence run cols-4 in the call
+    #The +2 comes from the top and bottom line.
+    # win_buffer is a buffer amount to soak up quick window resizes
+    win_buffer = 50
+    numLines = the_eula.get_lines(cols - 4) + 2 + win_buffer
+
+    eulapad = curses.newpad(numLines,cols-2)
     the_eula.curse_all(eulapad, stdscr, pos)
     while True:
+        last_lines, last_cols = lines, cols
         lines, cols = stdscr.getmaxyx()
+        stdscr.erase()
+        if lines < max_size[0] or cols < max_size[1]:
+            curses.resize_term(max_size[0], max_size[1])
+            lines, cols = stdscr.getmaxyx()
+        
         stdscr.addstr(lines - 1,4,"I agree", curses.A_STANDOUT if agree else 0)
         stdscr.addstr(lines - 1, cols - 19,"I do not agree", 0 if agree else curses.A_STANDOUT)
         stdscr.refresh()
-        eulapad.refresh(pos,0,1,1,lines - 2, cols - 1)
-        eula_length=eulapad.getmaxyx()[0]
+        
+        if cols == last_cols and lines == last_lines:  # If the window hasn't changed
+            eulapad.refresh(pos,0,1,1,lines - 2, cols - 2)
+            eula_length=eulapad.getmaxyx()[0]
+        else:
+            numLines = the_eula.get_lines(cols - 4) + 2 + win_buffer
+            eulapad.resize(numLines,cols-2)
+            eula_length=eulapad.getmaxyx()[0]
+            if pos > (eula_length - lines - win_buffer):
+                pos = (eula_length - lines - win_buffer)
+            the_eula.curse_all(eulapad, stdscr, pos)
+            
         key = stdscr.getch()
         if key == curses.KEY_UP and pos > 0:
             pos -= 1
-        elif key == curses.KEY_DOWN and pos < (eula_length - lines):
+        elif key == curses.KEY_DOWN and pos < (eula_length - lines - win_buffer):
             pos += 1
         elif key == curses.KEY_RIGHT:
             agree = False
@@ -216,11 +227,13 @@ def eula_check(stdscr):
             agree = True
         elif key == curses.KEY_ENTER or key == 10 or key == 13:
             break
-    curses.nocbreak()
-    stdscr.keypad(False)
-    curses.echo()
-    curses.endwin()
     return agree
 
+def eula_check():
+    try:
+        return curses.wrapper(eula_render)
+    except curses.error:
+        print("Window is too small!")
+        raise
 if __name__ == "__main__":
-    print(curses.wrapper(eula_check))
+    print(eula_check())
