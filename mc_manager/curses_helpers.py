@@ -270,9 +270,9 @@ class list_base():
         """
         key = stdscr.getch()
         if key == curses.KEY_DOWN:
-            self.key_down()
+            return self.key_down()
         elif key == curses.KEY_UP:
-            self.key_up()
+            return self.key_up()
         if key in [curses.KEY_ENTER, 10, 13]:
             return self.key_enter()
         elif key == 27:
@@ -319,6 +319,7 @@ class list_base():
                 self.start = max(0,len(self.items)-self.rows)
         else:
             self.selected -= 1
+        return True
 
     def sel_down(self):
         """This function is called to move the cursor down
@@ -331,7 +332,8 @@ class list_base():
                 self.selected = 0
                 self.start = 0
         else:
-            self.selected += 1 
+            self.selected += 1
+        return True
 
 class list_editor(list_base):
     """class for a list of item_editor items

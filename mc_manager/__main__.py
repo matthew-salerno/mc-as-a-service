@@ -87,7 +87,6 @@ def tui(stdscr):
         menu_items = {
                     "Start":commands.start,
                     "Stop":commands.stop,
-                    "Console":commands.connect,
                     "Install":commands.install,
                     "Eula":commands.set_eula
                     }
@@ -95,8 +94,8 @@ def tui(stdscr):
                     "Launch Options":commands.tui_launch_options,
                     "Server Options":commands.tui_server_options
                     }
-        selector = curses_helpers.select_v(list(menu_items+tui_items))
-        selected = curses.wrapper(selector.display)
+        selector = curses_helpers.select_v(list(menu_items)+list(tui_items))
+        selected = selector.display(stdscr)
         if selected == None:
             break
         if selected in menu_items:
