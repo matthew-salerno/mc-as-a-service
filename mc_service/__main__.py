@@ -265,7 +265,10 @@ class manager(object):
 
     @property
     def mc_version(self):
-        return self._config_data["server"]["version"]
+        if "version" in self._config_data["server"]:
+            return self._config_data["server"]["version"]
+        else:
+            return "None"
 
     @property
     def ramdisk(self):

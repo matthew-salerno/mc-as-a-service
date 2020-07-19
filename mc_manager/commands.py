@@ -62,6 +62,8 @@ def set_eula(args=[], printer=print):
     return agree
 
 def tui_set_eula(stdscr):
+    """sets eula without creating a wrapper
+    """
     return eula.eula_check(stdscr)
 
 def mc_version(args=[], printer=print):
@@ -235,12 +237,14 @@ def status(args=[], printer=print):
         return False
 
 def stop_service(args=[],printer=print):
+    """stops the mc-as-a-service service
+    """
     printer("stopping service")
     manager.stop_service()
     printer("service stopped")
 
 def install(args=[], printer=print):
-    """[summary]
+    """Tells the service to install a minecraft server
 
     Args:
         *args[0] (str, optional): The version to install,
