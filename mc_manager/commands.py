@@ -52,7 +52,7 @@ def set_eula(args=[], printer=print):
     Returns:
         bool: returns whether or not the user has agreed to the eula
     """
-    if curses.wrapper(tui_set_eula)
+    if curses.wrapper(tui_set_eula):
         printer("Signed EULA")
         agree = True
     else:
@@ -62,7 +62,7 @@ def set_eula(args=[], printer=print):
     return agree
 
 def tui_set_eula(stdscr):
-    return eula.eula_check(stdscr):
+    return eula.eula_check(stdscr)
 
 def mc_version(args=[], printer=print):
     """Returns the minecraft game version
