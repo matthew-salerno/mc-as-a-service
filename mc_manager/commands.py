@@ -52,7 +52,7 @@ def set_eula(args=[], printer=print):
     Returns:
         bool: returns whether or not the user has agreed to the eula
     """
-    if curses.wrapper(eula.eula_check):
+    if eula.eula_check():
         printer("Signed EULA")
         agree = True
     else:
