@@ -37,7 +37,6 @@ def process_command(arguments):
                 "status": commands.status,
                 "install": commands.install,
                 "launch-options": commands.launch_options,
-                "connect": commands.connect,
                 "stop-service": commands.stop_service
                 }
     quiet = False
@@ -54,7 +53,7 @@ def process_command(arguments):
             else:
                 print("No command found!")
         else:
-            tui()
+            curses.wrapper(tui)
 
 
 def version(args):
@@ -80,7 +79,7 @@ def cmd_help(args):
     print(helpstring)
 
 
-def tui():
+def tui(stdscr):
     """This is the top level TUI interface,
     or main menu
     """
@@ -89,16 +88,21 @@ def tui():
                     "Start":commands.start,
                     "Stop":commands.stop,
                     "Console":commands.connect,
-                    "Launch Options":commands.tui_launch_options,
-                    "Server Options":commands.tui_server_options,
                     "Install":commands.install,
                     "Eula":commands.set_eula
                     }
-        selector = curses_helpers.select_v(list(menu_items))
+        tui_items = {
+                    "Launch Options":commands.tui_launch_options,
+                    "Server Options":commands.tui_server_options
+                    }
+        selector = curses_helpers.select_v(list(menu_items+tui_items))
         selected = curses.wrapper(selector.display)
         if selected == None:
             break
-        menu_items[selected](printer=commands.blank)
+        if selected in menu_items:
+            menu_items[selected](printer=commands.blank)
+        elif selected in tui_items:
+            tui_items[selected](stdscr)
 
 if __name__ == "__main__":
     process_command(sys.argv[1:])

@@ -52,7 +52,7 @@ def set_eula(args=[], printer=print):
     Returns:
         bool: returns whether or not the user has agreed to the eula
     """
-    if eula.eula_check():
+    if curses.wrapper(tui_set_eula)
         printer("Signed EULA")
         agree = True
     else:
@@ -61,6 +61,8 @@ def set_eula(args=[], printer=print):
     manager.eula = agree
     return agree
 
+def tui_set_eula(stdscr):
+    return eula.eula_check(stdscr):
 
 def mc_version(args=[], printer=print):
     """Returns the minecraft game version
@@ -142,7 +144,7 @@ def ramdisk(args=[], printer=print):
 
 
 
-def set_property(key, value=None, printer=print):
+def set_property(args, printer=print):
     """sets a property in server.properties
 
     Args:
@@ -156,16 +158,21 @@ def set_property(key, value=None, printer=print):
     Raises:
         TypeError: Type error if the value is of the wrong type
     """
+    if not len(args):
+        return curses.wrapper(tui_server_options)
     properties = manager.server_properties
-    if value is None:
+    key = args[0]
+    if len(args) > 1:
+        value = args[1]
+        if type(value) is str:
+            properties[key] = value
+            printer(f"Property \"{key}\" is now \"{value}\"")
+        else:
+            raise TypeError("Value must be str or empty")
+    else:
         if key in properties:
             del properties[key]
             printer(f"Deleted property \"{key}\"")
-    elif type(value) is str:
-        properties[key] = value
-        printer(f"Property \"{key}\" is now \"{value}\"")
-    else:
-        raise TypeError("Value must be str or None")
     manager.server_properties = properties
 
 
@@ -323,20 +330,14 @@ def launch_options(args=[], printer=print):
     
     return args
 
-
-def connect(args=[], printer=print):
-    """TODO
-    """
-    printer("Not implemented")
-
-def tui_launch_options(**kwargs):
+def tui_launch_options(stdscr):
     """This is the TUI for selecting launch options
     """
     items = [curses_helpers.item_editor("Launch Path", set_path(printer=blank)),
              curses_helpers.item_editor("Launch Options"," ".join(launch_options(printer=blank))),
              curses_helpers.item_editor("Ramdisk",ramdisk(printer=blank))]
     menu = curses_helpers.list_editor(items)
-    changes = curses.wrapper(menu.display)
+    changes = menu.display(stdscr)
     for change in changes:
         if change[0] == "Launch Path":
             set_path(change[1], printer=blank)
@@ -345,7 +346,7 @@ def tui_launch_options(**kwargs):
         elif change[0] == "Ramdisk":
             ramdisk(change[1], printer=blank)
 
-def tui_server_options(**kwargs):
+def tui_server_options(stdscr):
     """This is the TUI for changing server.properties settings
     """
     options = manager.server_properties
@@ -360,7 +361,7 @@ def tui_server_options(**kwargs):
     sorter = lambda x: x.name
     opt_list.sort(key=sorter)
     items = curses_helpers.list_editor(opt_list)
-    changed_list = curses.wrapper(items.display)
+    changed_list = items.display(stdscr)
     for item in changed_list:
         new_options[item[0]] = item[1]
     manager.server_properties = new_options

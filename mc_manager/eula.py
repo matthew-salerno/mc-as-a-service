@@ -229,11 +229,11 @@ def eula_render(stdscr):
             break
     return agree
 
-def eula_check():
+def eula_check(stdscr):
     try:
-        return curses.wrapper(eula_render)
+        return eula_render(stdscr)
     except curses.error:
         print("Window is too small!")
         raise
 if __name__ == "__main__":
-    print(eula_check())
+    print(curses.wrapper(eula_check))
