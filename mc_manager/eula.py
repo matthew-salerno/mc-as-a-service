@@ -79,12 +79,12 @@ class eula():
                         pad.move(y_position,0)
                         
                 else:
-                    string = textwrap.fill(string, pad_cols-2, initial_indent=' '*x_position, drop_whitespace=False)
+                    string = textwrap.fill(string, pad_cols-2, initial_indent=' '*x_position, drop_whitespace=True)
                     string = re.sub('\n ', '\n', string)
                     string = string[x_position:]
                     pad.addstr(y_position, x_position, string, string_format)
                 lines, cols = stdscr.getmaxyx()
-                pad.refresh(pos,0,1,1,lines - 2, cols - 2)
+                pad.refresh(pos,0,1,2,lines - 2, cols-2)
             
     def get_lines(self, cols):
         numLines = 0
@@ -184,12 +184,12 @@ def eula_render(stdscr):
     curses.cbreak()
     stdscr.keypad(True)
     
-    #Pad will put 1 space on the left and right. As you use an additional 2 spaces of padding on the right,
+    #Pad will put 2 spaces on the left and right, hence the -4.
     #You get that the total spacing is 4. Hence run cols-4 in the call
     #The +2 comes from the top and bottom line.
     # win_buffer is a buffer amount to soak up quick window resizes
-    win_buffer = 50
-    numLines = the_eula.get_lines(cols - 4) + 2 + win_buffer
+    win_buffer = 5
+    numLines = the_eula.get_lines(cols-4) + 2 + win_buffer
 
     eulapad = curses.newpad(numLines,cols-2)
     the_eula.curse_all(eulapad, stdscr, pos)
@@ -206,7 +206,7 @@ def eula_render(stdscr):
         stdscr.refresh()
         
         if cols == last_cols and lines == last_lines:  # If the window hasn't changed
-            eulapad.refresh(pos,0,1,1,lines - 2, cols - 2)
+            eulapad.refresh(pos,0,1,2,lines - 2, cols - 2)
             eula_length=eulapad.getmaxyx()[0]
         else:
             numLines = the_eula.get_lines(cols - 4) + 2 + win_buffer
