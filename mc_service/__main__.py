@@ -126,7 +126,7 @@ class manager(object):
 
     def save_config(self):
         with const.CONFIG_PATH.open("w") as config:
-            json.dump(self._config_data, config)
+            json.dump(self._config_data, config, indent=4, sort_keys=True)
             config.close()
         return True
 

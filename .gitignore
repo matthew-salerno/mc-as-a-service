@@ -9,4 +9,3 @@ mc_manager/__pycache__
 mc_service/logs
 snapdev
 logs
-config.json
