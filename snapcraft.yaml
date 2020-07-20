@@ -1,5 +1,5 @@
-name: mc-as-a-service
-version: 1.0.0a1.dev2
+name: mc-service
+version: 1.0.0a1.dev3
 base: core20
 summary: Minecraft server run as a service
 description: Runs, configures, and helps manage a minecraft server. Designed with ubuntu core in mind
@@ -15,21 +15,8 @@ slots:
     interface: dbus
     bus: system
     name: com.salernosection.mc_as_a_service
-
-plugs:
-  dbus-plug:
-    interface: dbus
-    bus: system
-    name: com.salernosection.mc_as_a_service
         
 apps:
-  mc-manager:
-    command: bin/python3 $SNAP/mc_manager
-    plugs:
-      - dbus-plug
-    environment:
-      GI_TYPELIB_PATH: $SNAP/usr/lib/girepository-1.0:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/girepository-1.0
-        
   mc-service:
     daemon: simple
     command: bin/python3 $SNAP/mc_service
@@ -67,8 +54,8 @@ parts:
       - gir1.2-glib-2.0
       - gir1.2-freedesktop
 
-  mc-server:
-    source: https://github.com/matthew-salerno/mc-as-a-service.git
+  mc-service:
+    source: https://github.com/matthew-salerno/mc-service.git
     source-type: git
     plugin: dump
 

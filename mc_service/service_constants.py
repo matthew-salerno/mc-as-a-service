@@ -52,14 +52,14 @@ class constants():
 
     @property
     def CONFIG_PATH(self):
-        return self.ROOT_PATH/"config.json"
+        return self.ROOT_PATH/"mc_service"/"config.json"
 
     @property
     def RESOURCES_DIR(self):
         if self.SNAP:
-            return Path(environ["SNAP"])/"resources"
+            return Path(environ["SNAP"])/"mc_service"/"resources"
         else:
-            return self.ROOT_PATH/"resources"
+            return self.ROOT_PATH/"mc_service"/"resources"
 
     @property
     def DEFAULT_CONFIG_PATH(self):
