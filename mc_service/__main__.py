@@ -65,13 +65,7 @@ class manager(object):
 
     def load_config(self):
         config_path = const.CONFIG_PATH
-        if not config_path.is_file():
-            print("No config found, loading defaults")
-            default_config_path = const.DEFAULT_CONFIG_PATH
-            if default_config_path.exists():
-                shutil.copy(default_config_path,config_path)
-            else:
-                raise FileNotFoundError("Config file and default config file could not be found!")
+
         config = config_path.open("r")
         self._config_data = json.load(config)
         # make sure server directory isn't escaped
@@ -603,12 +597,21 @@ class ramdisk():
 def start_service():
     """This function starts the mc-as-a-service service
     """
+    # Make sure all the files we expect to exist, do exist
+    if not (const.SERVICE_DIR).is_dir():
+        const.SERVICE_DIR.mkdir()
     if not (const.SERVER_DIR_PATH).is_dir():
         const.SERVER_DIR_PATH.mkdir()
-    if not const.RAMDISK_PATH.is_dir():
-        const.RAMDISK_PATH.mkdir()
     if not const.LOGS_DIR.is_dir():
         const.LOGS_DIR.mkdir()
+    if not const.RAMDISK_PATH.is_dir():
+        const.RAMDISK_PATH.mkdir()
+    if not const.CONFIG_PATH.is_file():
+        print("No config found, loading defaults")
+        if const.DEFAULT_CONFIG_PATH.exists():
+            shutil.copy(const.DEFAULT_CONFIG_PATH,const.CONFIG_PATH)
+        else:
+            raise FileNotFoundError("Config file and default config file could not be found!")
     service_manager = manager(loop)
     publish = bus.publish(const.INTERFACE, service_manager)
     GLib.timeout_add_seconds(interval=1,
