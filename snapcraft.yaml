@@ -24,7 +24,7 @@ apps:
   mc-service:
     daemon: simple
     command: bin/python3 $SNAP/mc_service
-    stop-command: bin/python3 $SNAP/mc_manager stop-service
+    stop-command: bin/dbus-send --system --type=method_call --dest=com.salernosection.mc_as_a_service  /com/salernosection/minecraft_as_a_service/status com.salernosection.mc_as_a_service.stop_service
     plugs:
       - network
       - network-bind
