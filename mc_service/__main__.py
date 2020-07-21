@@ -85,7 +85,7 @@ class manager(object):
 
     def sync_properties(self):
         """adds properties from server.properties to default_config if default
-        config does not constain a key for said property. Also adds properties
+        config does not contain a key for said property. Also adds properties
         to config if the property has changed since it was last loaded
         """
         if not const.PROPERTIES_PATH.exists():
@@ -201,6 +201,7 @@ class manager(object):
         Returns:
             dict{str:str}: returns a dict of keys and values for server options
         """
+        self.sync_properties()
         return self._config_data["server"]["properties"]
 
     @server_properties.setter
@@ -223,6 +224,7 @@ class manager(object):
         Returns:
             dict{str:str}: returns a dict of keys and values for server options
         """
+        self.sync_properties()
         return self._config_data["server"]["default_properties"]
 
     @property
