@@ -2,6 +2,7 @@ import service_constants, installer
 import re
 import json
 import subprocess
+import os
 from os import environ, chdir
 from time import sleep, gmtime, strftime
 from pydbus.generic import signal
@@ -9,6 +10,7 @@ import shutil
 from pathlib import Path
 from dirsync import sync
 from gi.repository import GLib
+import psutil
 
 const = service_constants.constants()
 
@@ -521,8 +523,14 @@ class server():
                                         ["nogui"],
                                         shell=False, stdin=subprocess.PIPE,
                                         stdout=out, bufsize=0,
-                                        cwd=const.SERVER_DIR_PATH,
-                                        creationflags=subprocess.HIGH_PRIORITY_CLASS)
+                                        cwd=const.SERVER_DIR_PATH)
+        
+        process = psutil.Process(self._server.pid)
+        if os.name == 'nt':
+            process.nice(psutil.HIGH_PRIORITY_CLASS)
+        elif os.name == 'posix':
+            process.nice(-15)
+
 
         if self.wait_for(r"\[Server thread/INFO\]: Done"):
                 print("Server started!")
