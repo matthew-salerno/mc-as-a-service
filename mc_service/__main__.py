@@ -10,7 +10,6 @@ import shutil
 from pathlib import Path
 from dirsync import sync
 from gi.repository import GLib
-import psutil
 
 const = service_constants.constants()
 
@@ -526,13 +525,6 @@ class server():
                                         cwd=const.SERVER_DIR_PATH)
         
         process = psutil.Process(self._server.pid)
-        # Probably won't be used, but it will make my life easier
-        # if i ever make this cross platform
-        if os.name == 'nt':  
-            process.nice(psutil.HIGH_PRIORITY_CLASS)
-        # Must have root perms
-        elif os.name == 'posix' and os.geteuid() == 0:  
-            process.nice(-15)
         if self.wait_for(r"\[Server thread/INFO\]: Done",timeout):
                 print("Server started!")
                 return True
