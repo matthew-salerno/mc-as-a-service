@@ -59,7 +59,7 @@ class manager(object):
         print("Finishing up...")
         self.sync_properties()
         self.save_properties()
-        self.stop(120)
+        self.stop(240)
         self.save_config()
         print("Done")
 
@@ -521,7 +521,8 @@ class server():
                                         ["nogui"],
                                         shell=False, stdin=subprocess.PIPE,
                                         stdout=out, bufsize=0,
-                                        cwd=const.SERVER_DIR_PATH)
+                                        cwd=const.SERVER_DIR_PATH,
+                                        creationflags=subprocess.HIGH_PRIORITY_CLASS)
 
         if self.wait_for(r"\[Server thread/INFO\]: Done"):
                 print("Server started!")
@@ -551,6 +552,8 @@ class server():
                 return True
             elif timer >= timeout and timeout > 0:
                 raise TimeoutError
+            elif not self.status():
+                return False
             else:
                 timer += attempt_interval
                 sleep(attempt_interval)
@@ -586,6 +589,8 @@ class ramdisk():
             self._server.send("save-all")
             self._server.wait_for(r"Saved the game", 120)
             self._server.send("save-off")
+        if not self._world_path.is_dir():
+            self._world_path.mkdir()
         sync(const.RAMDISK_PATH, self._world_path, 'sync', create=True, purge=True, verbose=True)
         if self._server.status():
             self._server.send("save-on")
@@ -594,7 +599,8 @@ class ramdisk():
     def load(self):
         """Loads contents from the server's world folder into the ramdisk
         """
-        sync(self._world_path, const.RAMDISK_PATH, 'sync', create=True, purge=True, verbose=True)
+        if self._world_path.is_dir():
+            sync(self._world_path, const.RAMDISK_PATH, 'sync', create=True, purge=True, verbose=True)
 
 def start_service():
     """This function starts the mc-as-a-service service
