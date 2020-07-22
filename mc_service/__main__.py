@@ -523,8 +523,6 @@ class server():
                                         shell=False, stdin=subprocess.PIPE,
                                         stdout=out, bufsize=0,
                                         cwd=const.SERVER_DIR_PATH)
-        
-        process = psutil.Process(self._server.pid)
         if self.wait_for(r"\[Server thread/INFO\]: Done",timeout):
                 print("Server started!")
                 return True
