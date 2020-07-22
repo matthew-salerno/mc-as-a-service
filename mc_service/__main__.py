@@ -526,19 +526,20 @@ class server():
                                         cwd=const.SERVER_DIR_PATH)
         
         process = psutil.Process(self._server.pid)
-        if os.name == 'nt':
+        # Probably won't be used, but it will make my life easier
+        # if i ever make this cross platform
+        if os.name == 'nt':  
             process.nice(psutil.HIGH_PRIORITY_CLASS)
-        elif os.name == 'posix':
+        # Must have root perms
+        elif os.name == 'posix' and os.geteuid() == 0:  
             process.nice(-15)
-
-
-        if self.wait_for(r"\[Server thread/INFO\]: Done"):
+        if self.wait_for(r"\[Server thread/INFO\]: Done",timeout):
                 print("Server started!")
                 return True
         else:
             return False
 
-    def wait_for(self, message, timeout=30):
+    def wait_for(self, message, timeout=60):
         """Waits for a particular regex to appear in the server logs
 
         Args:
